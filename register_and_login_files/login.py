@@ -63,7 +63,7 @@ def registerpopup():
 
 # Heading
 tk.Label(root, text="Login", font="Arial 15 bold").grid(row=0, column=0, columnspan=10, pady=10)
-tk.Label(root, text="").grid(row=4, column=0, columnspan=3, rowspan=1)
+tk.Label(root, text="").grid(row=4, column=0, columnspan=3)
 
 # Field Name
 username = tk.Label(root, text="Username")
