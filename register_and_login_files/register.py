@@ -1,9 +1,10 @@
 import tkinter as tk
 import hashlib
+import subprocess
 
 root = tk.Tk()
-root.title("MMS - Registration")
-root.geometry("300x370")
+root.title("Register")
+root.geometry("300x450")
 
 # Centering the window on the screen
 window_width = root.winfo_reqwidth()
@@ -59,17 +60,24 @@ def getvals():
 
         encrypted_password = hashlib.sha256(passwordvar.get().encode()).hexdigest()
 
-        # Insert namevar.get(), usernamevar.get(), phonevar.get(), addressvar.get(), encrypted_password into MySQL
-        # TODO
+        # TODO Insert namevar.get(), usernamevar.get(), phonevar.get(), addressvar.get(), encrypted_password into MySQL
+
+        # TODO Add SMTP email
 
         # Create a label widget to display registration success message
         message(message="Registration Successful!", color='green')
     else:
         message()
 
+def loginpopup():
+    # Close window
+    root.destroy()
+    # Run register.py
+    subprocess.run(["python", "login.py"])
 
 # Heading
-tk.Label(root, text="Registration", font="Arial 15 bold").grid(row=0, column=0, columnspan=10, pady=10)
+tk.Label(root, text="Register", font="Arial 15 bold").grid(row=0, column=0, columnspan=10, pady=10)
+tk.Label(root, text="").grid(row=8, column=0, columnspan=3, rowspan=1)
 
 # Field Name
 name = tk.Label(root, text="Full Name")
@@ -78,6 +86,7 @@ password = tk.Label(root, text="Password")
 repeatpassword = tk.Label(root, text="Repeat Password")
 phone = tk.Label(root, text="Phone Number")
 address = tk.Label(root, text="Address")
+login = tk.Label(root, text="Already have an account? Login now.")
 
 # Packing Fields
 name.grid(row=1, column=0, padx=10, pady=10, sticky="w")
@@ -86,6 +95,7 @@ password.grid(row=3, column=0, padx=10, pady=10, sticky="w")
 repeatpassword.grid(row=4, column=0, padx=10, pady=10, sticky="w")
 phone.grid(row=5, column=0, padx=10, pady=10, sticky="w")
 address.grid(row=6, column=0, padx=10, pady=10, sticky="w")
+login.grid(row=9, column=0, columnspan=10, padx=10, pady=10)
 
 # Variables for storing data
 namevar = tk.StringVar()
@@ -115,5 +125,8 @@ addressentry.grid(row=6, column=2, pady=10, sticky="e")
 
 # Register button
 tk.Button(text="Register", command=getvals).grid(row=7, column=1, pady=10)
+
+# Login button
+tk.Button(text="Login", command=loginpopup).grid(row=10, column=0, columnspan=10)
 
 root.mainloop()
