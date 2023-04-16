@@ -4,14 +4,14 @@ import subprocess
 
 root = tk.Tk()
 root.title("Login")
-root.geometry("220x280")
+# root.geometry("220x280")
 
 # Centering the window on the screen
-window_width = root.winfo_reqwidth()
-window_height = root.winfo_reqheight()
-position_right = int(root.winfo_screenwidth() / 2 - window_width / 2)
-position_down = int(root.winfo_screenheight() / 2 - window_height / 2)
-root.geometry("+{}+{}".format(position_right, position_down))
+window_width = 220
+window_height = 280
+x = int(int(root.winfo_screenwidth() / 2) - int(window_width / 2))
+y = int(int(root.winfo_screenheight() / 2) - int(window_height / 2))
+root.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
 # Preventing window resizing
 root.resizable(width=False, height=False)
@@ -25,7 +25,7 @@ def authenticate():
             widget.destroy()
 
         # Create a label widget if the fields are not all filled
-        tk.Label(root, text=message, fg=color).grid(row=4, column=0, columnspan=3, rowspan=1)
+        tk.Label(root, text=message, fg=color).grid(row=4, column=0, columnspan=3)
 
     # Check if all entry fields are filled
     if usernamevar.get() and passwordvar.get():
