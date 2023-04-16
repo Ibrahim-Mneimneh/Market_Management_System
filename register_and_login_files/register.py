@@ -94,7 +94,6 @@ passwordvar = tk.StringVar()
 repeatpasswordvar = tk.StringVar()
 phonevar = tk.StringVar()
 addressvar = tk.StringVar()
-# checkvalue = tk.IntVar()
 
 # Creating entry field
 nameentry = tk.Entry(root, textvariable=namevar)
@@ -113,10 +112,6 @@ passwordentry.grid(row=3, column=2, pady=10, sticky="e")
 repeatpasswordentry.grid(row=4, column=2, pady=10, sticky="e")
 phoneentry.grid(row=5, column=2, pady=10, sticky="e")
 addressentry.grid(row=6, column=2, pady=10, sticky="e")
-
-# Creating Checkbox
-# checkbtn = tk.Checkbutton(text="Remember Me?", variable=checkvalue)
-# checkbtn.grid(row=6, column=3)
 
 # Register button
 tk.Button(text="Register", command=getvals).grid(row=7, column=1, pady=10)
