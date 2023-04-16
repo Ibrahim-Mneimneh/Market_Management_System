@@ -4,14 +4,14 @@ import subprocess
 
 root = tk.Tk()
 root.title("Register")
-root.geometry("300x450")
+# root.geometry("300x450")
 
 # Centering the window on the screen
-window_width = root.winfo_reqwidth()
-window_height = root.winfo_reqheight()
-position_right = int(root.winfo_screenwidth() / 2 - window_width / 2)
-position_down = int(root.winfo_screenheight() / 2 - window_height / 2)
-root.geometry("+{}+{}".format(position_right, position_down))
+window_width = 300
+window_height = 450
+x = int(int(root.winfo_screenwidth() / 2) - int(window_width / 2))
+y = int(int(root.winfo_screenheight() / 2) - int(window_height / 2))
+root.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
 # Preventing window resizing
 root.resizable(width=False, height=False)
