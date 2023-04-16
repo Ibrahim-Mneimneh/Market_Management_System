@@ -18,7 +18,7 @@ root.resizable(width=False, height=False)
 
 def getvals():
     def message(message = "Please fill all the fields!", color = 'red'):
-        # Destory previous message label
+        # Destroy previous message label
         widgets = root.grid_slaves(row=8, column=0)
         for widget in widgets:
             widget.destroy()
