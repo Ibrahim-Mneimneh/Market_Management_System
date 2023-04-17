@@ -1,2 +1,3 @@
 # ER Diagram
-![Market Management System - ER Diagram (1)](https://user-images.githubusercontent.com/61628216/231749296-e92ddfb6-be90-420f-82f8-28ae14e84198.png)
+![Market Management System - ER Diagram (2)](https://user-images.githubusercontent.com/61628216/232439584-8546661e-f3a0-45cf-ad75-45d6a7540254.png)
+
