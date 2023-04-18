@@ -2,14 +2,55 @@ import hashlib
 import subprocess
 import customtkinter
 import mysql.connector
+import codecs
+import os
+import atexit
 
-password = input("Enter password for MySql: ")
+
+def on_exit():
+    print("Program is exiting!")
+    file_path = "../SQL/sqlpassword.txt"
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        print("File removed!")
+    else:
+        print("File does not exist.")
+
+
+atexit.register(on_exit)
+
+sqlpassword = ""
+
+
+def readpassword():
+    global sqlpassword
+    file_path = "../SQL/sqlpassword.txt"
+    if os.path.exists(file_path):
+        if os.path.getsize(file_path) > 0:
+            with open(file_path, "r") as f:
+                sqlpassword = codecs.decode(f.read(), 'rot13')
+                return True
+        else:
+            print("File is empty.")
+            subprocess.run(['python', '../SQL/getSQLpassword.py'])
+    else:
+        print("File does not exist.")
+        subprocess.run(['python', '../SQL/getSQLpassword.py'])
+    return False
+
+
+while not readpassword():
+    readpassword()
+
+# result = subprocess.run(['python', '../SQL/getSQLpassword.py'], capture_output=True, text=True)
+# sqlpassword = result.stdout.strip()
+# sqlpassword = codecs.decode(result_output, 'rot13')
 
 try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password=password,
+        password=sqlpassword,
         port=3306,
         database="mms"
     )
@@ -114,7 +155,7 @@ def getvals():
 def loginpopup():
     # Close window
     root.destroy()
-    # Run register.py
+    # Run login.py
     subprocess.run(["python", "login.py"])
 
 

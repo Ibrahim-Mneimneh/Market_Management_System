@@ -2,6 +2,45 @@ import hashlib
 import subprocess
 import customtkinter
 import mysql.connector
+import codecs
+import os
+import atexit
+
+
+def on_exit():
+    print("Program is exiting!")
+    file_path = "../SQL/sqlpassword.txt"
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        print("File removed!")
+    else:
+        print("File does not exist.")
+
+
+atexit.register(on_exit)
+
+sqlpassword = ""
+
+
+def readpassword():
+    global sqlpassword
+    file_path = "../SQL/sqlpassword.txt"
+    if os.path.exists(file_path):
+        if os.path.getsize(file_path) > 0:
+            with open(file_path, "r") as f:
+                sqlpassword = codecs.decode(f.read(), 'rot13')
+                return True
+        else:
+            print("File is empty.")
+            subprocess.run(['python', '../SQL/getSQLpassword.py'])
+    else:
+        print("File does not exist.")
+        subprocess.run(['python', '../SQL/getSQLpassword.py'])
+    return False
+
+
+while not readpassword():
+    readpassword()
 
 customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
 customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
@@ -52,7 +91,7 @@ def authenticate():
             message("Incorrect username or password.")
             return
 
-        # Create a label widget to display registration success message
+        # Create a label widget to display login success message
         message(m="Login Successful!", color='green')
     else:
         message()
@@ -92,9 +131,9 @@ usernameentry.grid(row=1, column=2, pady=10, sticky="e")
 passwordentry.grid(row=2, column=2, pady=10, sticky="e")
 
 # Login button
-customtkinter.CTkButton(master=root,text="Login", command=authenticate).grid(row=3, column=0, columnspan=10, pady=10)
+customtkinter.CTkButton(master=root, text="Login", command=authenticate).grid(row=3, column=0, columnspan=10, pady=10)
 
 # Register button
-customtkinter.CTkButton(master=root,text="Register", command=registerpopup).grid(row=6, column=0, columnspan=10)
+customtkinter.CTkButton(master=root, text="Register", command=registerpopup).grid(row=6, column=0, columnspan=10)
 
 root.mainloop()
