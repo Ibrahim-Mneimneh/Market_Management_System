@@ -101,7 +101,7 @@ def registerpopup():
     # Close window
     root.destroy()
     # Run register.py
-    subprocess.run(["python", "register.py"])
+    subprocess.run(["python", "../register_and_login_files/register.py"])
 
 
 # Heading

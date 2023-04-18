@@ -156,7 +156,7 @@ def loginpopup():
     # Close window
     root.destroy()
     # Run login.py
-    subprocess.run(["python", "login.py"])
+    subprocess.run(["python", "../register_and_login_files/login.py"])
 
 
 # Heading
