@@ -1,6 +1,22 @@
 import hashlib
 import subprocess
 import customtkinter
+import mysql.connector
+
+password = input("Enter password for MySql: ")
+
+try:
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password=password,
+        port=3306,
+        database="mms"
+    )
+except mysql.connector.Error as error:
+    print("Database Connection Failed!")
+    quit()
+    mydb.close()
 
 customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
 customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
@@ -23,16 +39,15 @@ root.resizable(width=False, height=False)
 def getvals():
     def message(m="Please fill all the fields!", color='red'):
         # Destroy previous message label
-        widgets = root.grid_slaves(row=8, column=0)
+        widgets = root.grid_slaves(row=9, column=0)
         for widget in widgets:
             widget.destroy()
 
         # Create a label widget if the fields are not all filled
-        customtkinter.CTkLabel(master=root, text=m, text_color=color).grid(row=8, column=0, columnspan=3)
+        customtkinter.CTkLabel(master=root, text=m, text_color=color).grid(row=9, column=0, columnspan=3)
 
     # Check if all entry fields are filled
-    if namevar.get() and usernamevar.get() and phonevar.get() and addressvar.get() and passwordvar.get() and \
-            repeatpasswordvar.get():
+    if namevar.get() and usernamevar.get() and phonevar.get() and passwordvar.get() and repeatpasswordvar.get() and emailvar.get():
 
         # Check if there is a space in the name
         if not (' ' in namevar.get() and namevar.get().index(' ') != 0 and namevar.get().index(' ') != len(
@@ -64,7 +79,29 @@ def getvals():
 
         encrypted_password = hashlib.sha256(passwordvar.get().encode()).hexdigest()
 
-        # TODO Insert namevar.get(), usernamevar.get(), phonevar.get(), addressvar.get(), encrypted_password into MySQL
+        # Add an Employee
+        try:
+            fname, lname = namevar.get().split()
+            query = "INSERT INTO Employee (Firstname, Lastname, Salary, PhoneNumber)" \
+                    "VALUES (\"" + fname + "\", \"" + lname + "\", 500, \"" + phonevar.get() + "\");"
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+            print(cursor.rowcount, "rows were added to the database!")
+        except mysql.connector.IntegrityError as error:
+            print("Couldn't insert the record to the database, an integrity constraint failed!")
+
+        # Add an Account for the Employee
+        try:
+            # TODO Check if admin (check first 5 letters == "Admin")
+            query = "INSERT INTO Account VALUES (\"" + usernamevar.get() + "\", \"" + encrypted_password + "\", \"" + \
+                    emailvar.get() + "\", False, " + "(select EmpId from Employee where PhoneNumber = \"" + phonevar.get() + "\"));"
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+            print(cursor.rowcount, "rows were added to the database!")
+        except mysql.connector.IntegrityError as error:
+            print("Couldn't insert the record to the database, an integrity constraint failed!")
 
         # TODO Add SMTP email
 
@@ -83,13 +120,14 @@ def loginpopup():
 
 # Heading
 customtkinter.CTkLabel(root, text="Register", font=("Arial", 15, "bold")).grid(row=0, column=0, columnspan=10, pady=10)
-customtkinter.CTkLabel(root, text="").grid(row=8, column=0, columnspan=3)
+customtkinter.CTkLabel(root, text="").grid(row=9, column=0, columnspan=3)
 
 # Field Name
 name = customtkinter.CTkLabel(root, text="Full Name")
 username = customtkinter.CTkLabel(root, text="Username")
 password = customtkinter.CTkLabel(root, text="Password")
 repeatpassword = customtkinter.CTkLabel(root, text="Repeat Password")
+email = customtkinter.CTkLabel(root, text="Email")
 phone = customtkinter.CTkLabel(root, text="Phone Number")
 address = customtkinter.CTkLabel(root, text="Address")
 login = customtkinter.CTkLabel(root, text="Already have an account? Login now.")
@@ -99,40 +137,40 @@ name.grid(row=1, column=0, padx=10, pady=10, sticky="w")
 username.grid(row=2, column=0, padx=10, pady=10, sticky="w")
 password.grid(row=3, column=0, padx=10, pady=10, sticky="w")
 repeatpassword.grid(row=4, column=0, padx=10, pady=10, sticky="w")
-phone.grid(row=5, column=0, padx=10, pady=10, sticky="w")
-address.grid(row=6, column=0, padx=10, pady=10, sticky="w")
-login.grid(row=9, column=0, columnspan=10, padx=10, pady=10)
+email.grid(row=5, column=0, padx=10, pady=10, sticky="w")
+phone.grid(row=6, column=0, padx=10, pady=10, sticky="w")
+login.grid(row=10, column=0, columnspan=10, padx=10, pady=10)
 
 # Variables for storing data
 namevar = customtkinter.StringVar()
 usernamevar = customtkinter.StringVar()
 passwordvar = customtkinter.StringVar()
 repeatpasswordvar = customtkinter.StringVar()
+emailvar = customtkinter.StringVar()
 phonevar = customtkinter.StringVar()
-addressvar = customtkinter.StringVar()
 
 # Creating entry field
 nameentry = customtkinter.CTkEntry(root, textvariable=namevar)
 usernameentry = customtkinter.CTkEntry(root, textvariable=usernamevar)
 passwordentry = customtkinter.CTkEntry(root, show='*', textvariable=passwordvar)
 repeatpasswordentry = customtkinter.CTkEntry(root, show='*', textvariable=repeatpasswordvar)
+emailentry = customtkinter.CTkEntry(root, textvariable=emailvar)
 phoneentry = customtkinter.CTkEntry(root, validate="key", textvariable=phonevar)
 # Limit the entry to only numbers
 phoneentry.configure(validatecommand=(phoneentry.register(lambda char: char.isdigit() or char == ""), "%S"))
-addressentry = customtkinter.CTkEntry(root, textvariable=addressvar)
 
 # Packing entry fields
 nameentry.grid(row=1, column=2, pady=10, sticky="e")
 usernameentry.grid(row=2, column=2, pady=10, sticky="e")
 passwordentry.grid(row=3, column=2, pady=10, sticky="e")
 repeatpasswordentry.grid(row=4, column=2, pady=10, sticky="e")
-phoneentry.grid(row=5, column=2, pady=10, sticky="e")
-addressentry.grid(row=6, column=2, pady=10, sticky="e")
+emailentry.grid(row=5, column=2, pady=10, sticky="e")
+phoneentry.grid(row=6, column=2, pady=10, sticky="e")
 
 # Register button
-customtkinter.CTkButton(master=root, text="Register", command=getvals).grid(row=7, column=1, pady=10)
+customtkinter.CTkButton(master=root, text="Register", command=getvals).grid(row=8, column=1, pady=10)
 
 # Login button
-customtkinter.CTkButton(master=root, text="Login", command=loginpopup).grid(row=10, column=1)
+customtkinter.CTkButton(master=root, text="Login", command=loginpopup).grid(row=11, column=1)
 
 root.mainloop()
