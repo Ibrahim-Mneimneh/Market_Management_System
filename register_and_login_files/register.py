@@ -120,6 +120,8 @@ def getvals():
 
         encrypted_password = hashlib.sha256(passwordvar.get().encode()).hexdigest()
 
+        # TODO Check if username and email already exist
+
         # Add an Employee
         try:
             fname, lname = namevar.get().split()

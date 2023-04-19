@@ -20,7 +20,7 @@ root.geometry(f"{window_width}x{window_height}+{x}+{y}")
 root.resizable(width=False, height=False)
 
 
-def sqlcheck():
+def sqlcheck(event=None):
     def message(m="Please enter the SQL password!", color='red'):
         # Destroy previous message label
         widgets = root.grid_slaves(row=9, column=0)
@@ -47,12 +47,14 @@ def sqlcheck():
 
         message(m="Database Connection Success!", color='green')
 
-        root.destroy()
+        # root.destroy()
         # print(codecs.encode(passwordvar.get(), 'rot13'))
         # print(passwordvar.get())
         with open("../SQL/sqlpassword.txt", "w") as f:
             # Write the value of the variable to the file
             f.write(codecs.encode(passwordvar.get(), 'rot13'))
+        root.quit()
+        root.withdraw()
     else:
         message()
 
@@ -69,6 +71,9 @@ passwordentry = customtkinter.CTkEntry(root, show='*', textvariable=passwordvar)
 
 # Packing entry fields
 passwordentry.grid(row=3, column=1, pady=10, padx=50, sticky="e")
+
+# Bind Enter key press to sqlcheck function
+passwordentry.bind('<Return>', sqlcheck)
 
 # Continue button
 customtkinter.CTkButton(master=root, text="Continue", command=sqlcheck).grid(row=8, column=1, pady=10)
