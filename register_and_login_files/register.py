@@ -122,7 +122,7 @@ def getvals():
 
         # TODO Check if username and email already exist
 
-        # Add an Employee
+        # Add an Employee TODO add managerid too
         try:
             fname, lname = namevar.get().split()
             query = "INSERT INTO Employee (Firstname, Lastname, Salary, PhoneNumber)" \
