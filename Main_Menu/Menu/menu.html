@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Market Management System</title>
+        <link href="style.css" rel="stylesheet">
+        <script type="text/javascript" src="/eel.js"></script>
+        <script>
+        function routing(newPage){
+        window.close()
+        eel.routing(newPage)
+        }
+        </script>
+</head>
+<body>
+    <div class="login-section">
+        <div class="login-option">
+            <span>Market Management System</span>
+            <b>Welcome to Group 5 Market Management System</b>
+            <button onclick="routing('login.html')">Login</button>
+        </div>
+
+        <div class="login-pic">
+            <image src="./background_image.png" ></image>
+        </div>
+    </div>
+    <div class="signup-section">
+        <div class="signup-pic">
+            <image src="./background_image2.png"></image>
+        </div>
+        <div class="signup-option">
+            <span>Haven't Applied Yet ?</span>
+            <b>Sign up to register</b>
+            <button onclick="routing('signup.html')">Sign up</button>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,88 @@
+@import url("https://fonts.googleapis.com/css2?family=Dongle:wght@300;400&family=Inter:wght@400;600;700&display=swap");
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.login-section {
+  display: grid;
+  padding-top: 10px;
+  grid-template-columns: repeat(2, 2fr);
+  height: 50vh;
+  background-image: url(https://images.unsplash.com/photo-1530569673472-307dc017a82d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTV8fGJsdWUlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60);
+  background-size: cover;
+  color: black;
+  font-family: "Dongle", sans-serif;
+  font-weight: 700;
+}
+
+.login-option,
+.signup-option {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.login-option > span {
+  font-size: 60px;
+}
+.login-option > b {
+  font-size: 30px;
+}
+.login-option > button {
+  color: white;
+  background-color: rgb(90, 143, 243);
+  cursor: pointer;
+}
+.login-pic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.signup-section {
+  display: grid;
+  padding-top: 10px;
+  grid-template-columns: repeat(2, 2fr);
+  height: 47.25vh;
+  background-color: cornflowerblue;
+  background-size: cover;
+  color: black;
+  font-family: "Dongle", sans-serif;
+  font-weight: 700;
+}
+.signup-pic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.signup-option > span {
+  font-size: 60px;
+}
+.signup-option > b {
+  font-size: 30px;
+}
+.signup-option > button {
+  color: black;
+  background-color: white;
+  cursor: pointer;
+}
+button {
+  border-radius: 25px;
+  width: 100px;
+  height: 50px;
+  border: none;
+  outline: none;
+  font-family: "Dongle";
+  font-weight: 400;
+  font-size: 30px;
+  background-color: rgb(90, 143, 243);
+}
+button:hover {
+  background-color: rgb(134, 177, 255);
+}
+

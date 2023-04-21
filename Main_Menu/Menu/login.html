@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Market Management System (Login)</title>
+        <link href="login.css" rel="stylesheet">
+        <script type="text/javascript" src="/eel.js"></script>
+        <script>
+        var error ="";
+        document.getElementById('message').innerHTML = error;
+        function login(){
+            error =eel.login()
+        }
+        function signup(){
+            eel.signup()
+        }
+        function routing(newPage){
+        eel.routing(newPage)
+        }
+
+        </script>
+</head>
+<body>
+    <div class="login">
+        <span>Login</span>
+        <input type="text" placeholder="Username" required></input>
+        <input type="password" placeholder="Password" required></input>
+        <button>Login</button>
+        <b id="message"></b>
+
+    </div>
+</body>
+</html>
