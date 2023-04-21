@@ -36,10 +36,16 @@
         window.close()
         eel.routing(newPage)
         }
-
         function submit(){
         eel.signup("Ib97mn69ji*",firstname.value,lastname.value,email.value,username.value,phoneNumber.value,password.value);
         routing("home.html");
-        }</script>
+        }
+        expose.message=(message)=>{
+            document.getElementById("Error")
+            if(message==="Signed up Successfully"){
+            routing("home.html");
+            }
+        }
+    </script>
 </body>
 </html>

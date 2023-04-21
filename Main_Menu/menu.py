@@ -24,7 +24,7 @@ def signup(sqlpassword, firstname, lastname, email, username, phoneNumber, passw
         mydb.close()
 
     if not len(password) >= 8:
-        print("Password must be at least 8 characters long.")
+        "Password must be at least 8 characters long."
     elif not any(char.isdigit() for char in password):
         print("Password must contain at least 1 digit.")
     elif not any(char.isupper() for char in password):
