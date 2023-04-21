@@ -2,13 +2,13 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <script type="text/javascript" src="/eel.js">
+    </script>
     <title>Market Management System (Sign up)</title>
         <link href="signup.css" rel="stylesheet">
-        <script type="text/javascript" src="/eel.js">
-        </script>
 </head>
 <body>
-    <form onsubmit="submit()">
+    <div class="signup">
         <span>Signup</span>
             <div class="name">
                 <input type="text" placeholder="Firstname" required id="firstname"/>
@@ -19,33 +19,39 @@
             <input type="tel" placeholder="Phone Number" id="phoneNumber"/>
             <input type="password" placeholder="Password" required id="password"/>
             <input type="password" placeholder="Confirm Password" required id="confirmPassword"/>
-            <button>Signup</button>
-
-    </form>
-    <b id="message" style="color:red"></b>
-    <script>var username=document.getElementById("firstname");
+            <button onclick="submit()">Signup</button>
+            <b id="message" style="color:red"></b>
+    </div>
+    <script>var username=document.getElementById("firstname").value;
         var lastname=document.getElementById("lastname");
         var username=document.getElementById("username");
         var email=document.getElementById("email");
         var phoneNumber=document.getElementById("phoneNumber");
-        var password=document.getElementById("password");
-        var confirmPassword=document.getElementById("confirmPassword");
+        var password=document.getElementById("password").value;
+        var confirmPassword=document.getElementById("confirmPassword").value;
         var error =""
 
         function routing(newPage){
         window.close()
         eel.routing(newPage)
         }
-        function submit(){
-        eel.signup("Ib97mn69ji*",firstname.value,lastname.value,email.value,username.value,phoneNumber.value,password.value);
-        routing("home.html");
-        }
-        expose.message=(message)=>{
-            document.getElementById("Error")
-            if(message==="Signed up Successfully"){
+        function handleError(text){
+            document.getElementById("message").innerHTML=text;
+            if(text==="Signed up Successfully"){
             routing("home.html");
             }
         }
+        function submit(){
+        password=document.getElementById("password").value;
+        confirmPassword=document.getElementById("confirmPassword").value;
+        if(password!==confirmPassword){
+            document.getElementById("message").innerHTML="Please enter matching passwords."
+        }
+        else{
+            eel.signup("Ib97mn69ji*",firstname.value,lastname.value,email.value,username.value,phoneNumber.value,password)(handleError);
+            }
+        }
+
     </script>
 </body>
 </html>

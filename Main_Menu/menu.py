@@ -10,7 +10,7 @@ def login():
 
 
 @eel.expose
-def signup(sqlpassword, firstname, lastname, email, username, phoneNumber, password):
+def signup(sqlpassword, firstname, lastname, email, username, phonenumber, password):
     try:
         mydb = mysql.connector.connect(
             host="localhost",
@@ -23,36 +23,39 @@ def signup(sqlpassword, firstname, lastname, email, username, phoneNumber, passw
         quit()
         mydb.close()
 
-    if not len(password) >= 8:
-        "Password must be at least 8 characters long."
+    if not len(password) >= 5:
+        return "Password must be at least 8 characters long."
     elif not any(char.isdigit() for char in password):
-        print("Password must contain at least 1 digit.")
+        return "Password must contain at least 1 digit."
     elif not any(char.isupper() for char in password):
-        print("Password must contain at least 1 uppercase character.")
+        return "Password must contain at least 1 uppercase character."
     encrypted_password = hashlib.sha256(password.encode()).hexdigest()
-
+    print(phonenumber)
+    print(firstname)
     # Add an Employee
     try:
         query = "INSERT INTO Employee (Firstname, Lastname, Salary, PhoneNumber)" \
-                "VALUES (\"" + firstname + "\", \"" + lastname + "\", 500, \"" + phoneNumber + "\");"
+                "VALUES (\"" + firstname + "\", \"" + lastname + "\", 500, \"" + phonenumber + "\");"
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
         print(cursor.rowcount, "rows were added to the database!")
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
+        return "PhoneNumber is already in use"
 
     # add an account for the employee
     try:
         query = "INSERT INTO Account VALUES (\"" + username + "\", \"" + encrypted_password + "\", \"" + \
-                email + "\", False, " + "(select EmpId from Employee where PhoneNumber = \"" + phoneNumber + "\"));"
+                email + "\", False, " + "(select EmpId from Employee where PhoneNumber = \"" + phonenumber + "\"));"
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
         print(cursor.rowcount, "rows were added to the database!")
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
-    print("Signed up Successfully")
+        return "Username or email may be already in use."
+    return"Signed up Successfully"
 
 
 @eel.expose
