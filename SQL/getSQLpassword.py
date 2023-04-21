@@ -1,3 +1,5 @@
+import configparser
+
 import customtkinter
 import mysql.connector
 import codecs
@@ -32,18 +34,33 @@ def sqlcheck(event=None):
 
     # Check if all entry fields are filled
     if passwordvar.get():
+        config = configparser.ConfigParser()
+        config.read('../config.cfg')
 
         try:
             mydb = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password=passwordvar.get(),
+                host=config.get('mysql', 'host'),
+                user=config.get('mysql', 'user'),
+                password=config.get('mysql', 'password'),
                 port=3306,
-                database="mms"
-            )
+                database=config.get('mysql', 'database')
+        )
         except mysql.connector.Error as error:
-            message("Database Connection Failed!")
-            return
+            print("Database Connection Failed!")
+            quit()
+            mydb.close()
+
+        # try:
+        #     mydb = mysql.connector.connect(
+        #         host="localhost",
+        #         user="root",
+        #         password=passwordvar.get(),
+        #         port=3306,
+        #         database="mms"
+        #     )
+        # except mysql.connector.Error as error:
+        #     message("Database Connection Failed!")
+        #     return
 
         message(m="Database Connection Success!", color='green')
 
@@ -52,7 +69,8 @@ def sqlcheck(event=None):
         # print(passwordvar.get())
         with open("../SQL/sqlpassword.txt", "w") as f:
             # Write the value of the variable to the file
-            f.write(codecs.encode(passwordvar.get(), 'rot13'))
+            # f.write(codecs.encode(passwordvar.get(), 'rot13'))
+            f.write(codecs.encode(config.get('mysql', 'password'), 'rot13'))
         root.quit()
         root.withdraw()
     else:

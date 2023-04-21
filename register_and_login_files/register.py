@@ -1,3 +1,4 @@
+import configparser
 import hashlib
 import subprocess
 import customtkinter
@@ -46,18 +47,34 @@ while not readpassword():
 # sqlpassword = result.stdout.strip()
 # sqlpassword = codecs.decode(result_output, 'rot13')
 
-try:
-    mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password=sqlpassword,
-        port=3306,
-        database="mms"
-    )
-except mysql.connector.Error as error:
-    print("Database Connection Failed!")
-    quit()
-    mydb.close()
+# try:
+#     mydb = mysql.connector.connect(
+#         host="localhost",
+#         user="root",
+#         password=sqlpassword,
+#         port=3306,
+#         database="mms"
+#     )
+# except mysql.connector.Error as error:
+#     print("Database Connection Failed!")
+#     quit()
+#     mydb.close()
+
+    config = configparser.ConfigParser()
+    config.read('../config.cfg')
+
+    try:
+        mydb = mysql.connector.connect(
+            host=config.get('mysql', 'host'),
+            user=config.get('mysql', 'user'),
+            password=config.get('mysql', 'password'),
+            port=3306,
+            database=config.get('mysql', 'database')
+        )
+    except mysql.connector.Error as error:
+        print("Database Connection Failed!")
+        quit()
+        mydb.close()
 
 customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
 customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green

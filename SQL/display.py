@@ -8,9 +8,9 @@ import configparser
 
 entity = input("Entity: ")
 
-file_path = "../SQL/sqlpassword.txt"
-with open(file_path, "r") as f:
-    sqlpassword = codecs.decode(f.read(), 'rot13')
+# file_path = "../SQL/sqlpassword.txt"
+# with open(file_path, "r") as f:
+#     sqlpassword = codecs.decode(f.read(), 'rot13')
 
 # Connect to the database
 # try:
