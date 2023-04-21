@@ -4,6 +4,7 @@ from tkinter import *
 from tkinter import ttk
 import customtkinter
 import csv
+import configparser
 
 entity = input("Entity: ")
 
@@ -12,13 +13,28 @@ with open(file_path, "r") as f:
     sqlpassword = codecs.decode(f.read(), 'rot13')
 
 # Connect to the database
+# try:
+#     mydb = mysql.connector.connect(
+#         host="localhost",
+#         user="root",
+#         password=sqlpassword,
+#         port=3306,
+#         database="mms"
+#     )
+# except mysql.connector.Error as error:
+#     print("Database Connection Failed!")
+#     quit()
+#     mydb.close()
+
+config = configparser.ConfigParser()
+config.read('../config.cfg')
 try:
     mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password=sqlpassword,
+        host=config.get('mysql', 'host'),
+        user=config.get('mysql', 'user'),
+        password=config.get('mysql', 'password'),
         port=3306,
-        database="mms"
+        database=config.get('mysql', 'database')
     )
 except mysql.connector.Error as error:
     print("Database Connection Failed!")
@@ -68,14 +84,21 @@ def export_to_csv():
     # Close the CSV file
     csv_file.close()
 
+def remove_row(tree):
+    # Get the selected row(s)
+    selected_rows = tree.selection()
+
+    # Loop through each selected row and print the first column value
+    for row in selected_rows:
+        # TODO Remove query
+        values = tree.item(row, 'values')
+        print(values[0])
 
 # Create a Frame to hold the buttons
 button_frame = customtkinter.CTkFrame(root)
 button_frame.pack(side=TOP)
 
-# Create a button for removing selected row(s)
-remove_button = customtkinter.CTkButton(button_frame, text="Remove Row", command=lambda: print("Remove Row clicked"))
-remove_button.pack(side=LEFT, padx=10)
+
 
 # Create a button for exporting the table to a CSV file
 pdf_button = customtkinter.CTkButton(button_frame, text="Export to CSV", command=export_to_csv)
@@ -88,6 +111,10 @@ frame.pack(pady=10, padx=10, fill=BOTH, expand=True)
 # Create a Treeview widget to display the data
 tree = ttk.Treeview(frame, show='headings')
 tree.pack(side=LEFT, fill=BOTH, expand=True)
+
+# Create a button for removing selected row(s)
+remove_button = customtkinter.CTkButton(button_frame, text="Remove Row", command=lambda: remove_row(tree))
+remove_button.pack(side=LEFT, padx=10)
 
 # Create a scrollbar
 # scrollbar = customtkinter.CTkScrollbar(master = frame, orientation="vertical", command=tree.yview)
