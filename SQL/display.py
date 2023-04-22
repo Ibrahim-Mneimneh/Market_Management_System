@@ -1,30 +1,16 @@
-import configparser
-import hashlib
-import subprocess
-import customtkinter
+import codecs
 import mysql.connector
+from tkinter import *
+from tkinter import ttk
+import customtkinter
+import csv
+import configparser
 
+entity = input("Entity: ")
 
-    # result = subprocess.run(['python', '../SQL/getSQLpassword.py'], capture_output=True, text=True)
-    # sqlpassword = result.stdout.strip()
-    # sqlpassword = codecs.decode(result_output, 'rot13')
-
-    # try:
-    #     mydb = mysql.connector.connect(
-    #         host="localhost",
-    #         user="root",
-    #         password=sqlpassword,
-    #         port=3306,
-    #         database="mms"
-    #     )
-    # except mysql.connector.Error as error:
-    #     print("Database Connection Failed!")
-    #     quit()
-    #     mydb.close()
 
 config = configparser.ConfigParser()
 config.read('../config.cfg')
-
 try:
     mydb = mysql.connector.connect(
         host=config.get('mysql', 'host'),
@@ -38,161 +24,108 @@ except mysql.connector.Error as error:
     quit()
     mydb.close()
 
+# Create cursor
+mycursor = mydb.cursor()
+
+# Create a Tkinter window
+root = customtkinter.CTk()
+
 customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
 customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 
-root = customtkinter.CTk()
-root.title("Register")
-# root.geometry("300x450")
+# # Maximize the window
+# root.state('zoomed')
 
-# Centering the window on the screen
-window_width = 420
-window_height = 510
-x = int(int(root.winfo_screenwidth() / 2) - int(window_width / 2))
-y = int(int(root.winfo_screenheight() / 2) - int(window_height / 2))
-root.geometry(f"{window_width}x{window_height}+{x}+{y}")
-
-# Preventing window resizing
-root.resizable(width=False, height=False)
+# Set title
+root.title(entity + " Table View")
 
 
-def getvals():
-    def message(m="Please fill all the fields!", color='red'):
-        # Destroy previous message label
-        widgets = root.grid_slaves(row=9, column=0)
-        for widget in widgets:
-            widget.destroy()
+def export_to_csv():
+    # Create cursor
+    mycursor = mydb.cursor()
 
-        # Create a label widget if the fields are not all filled
-        customtkinter.CTkLabel(master=root, text=m, text_color=color).grid(row=9, column=0, columnspan=3)
+    # Fetch data from the table
+    mycursor.execute("SELECT * FROM " + entity)
+    data = mycursor.fetchall()
 
-    # Check if all entry fields are filled
-    if namevar.get() and usernamevar.get() and phonevar.get() and passwordvar.get() and repeatpasswordvar.get() and emailvar.get():
+    # Get the column names
+    mycursor.execute("SHOW COLUMNS FROM " + entity)
+    columns = [col[0] for col in mycursor.fetchall()]
 
-        # Check if there is a space in the name
-        if not (' ' in namevar.get() and namevar.get().index(' ') != 0 and namevar.get().index(' ') != len(
-                namevar.get()) - 1):
-            message("Enter your full name correctly.")
-            return
+    # Open a CSV file for writing
+    with open(entity + '.csv', mode='w', newline='') as csv_file:
+        # Create a CSV writer object
+        writer = csv.writer(csv_file)
 
-        # Check if username is one word
-        if not len(usernamevar.get().split()) == 1:
-            message("Username cannot have spaces.")
-            return
+        # Write the column names to the CSV file
+        writer.writerow(columns)
 
-        # Password conditions
-        if not passwordvar.get() == repeatpasswordvar.get():
-            message("Passwords do not match.")
-            return
-        elif not len(passwordvar.get()) >= 8:
-            message("Password must be at least 8 characters long.")
-            return
-        elif not any(char.isdigit() for char in passwordvar.get()):
-            message("Password must contain at least 1 digit.")
-            return
-        elif not any(char.islower() for char in passwordvar.get()):
-            message("Password must contain at least 1 lowercase character.")
-            return
-        elif not any(char.isupper() for char in passwordvar.get()):
-            message("Password must contain at least 1 uppercase character.")
-            return
+        # Write the data to the CSV file
+        for row in data:
+            writer.writerow(row)
 
-        encrypted_password = hashlib.sha256(passwordvar.get().encode()).hexdigest()
+    # Close the CSV file
+    csv_file.close()
 
-        # TODO Check if username and email already exist
+def remove_row(tree):
+    # Get the selected row(s)
+    selected_rows = tree.selection()
 
-        # Add an Employee TODO add managerid too
-        try:
-            fname, lname = namevar.get().split()
-            query = "INSERT INTO Employee (Firstname, Lastname, Salary, PhoneNumber)" \
-                    "VALUES (\"" + fname + "\", \"" + lname + "\", 500, \"" + phonevar.get() + "\");"
-            cursor = mydb.cursor()
-            cursor.execute(query)
-            mydb.commit()
-            print(cursor.rowcount, "rows were added to the database!")
-        except mysql.connector.IntegrityError as error:
-            print("Couldn't insert the record to the database, an integrity constraint failed!")
+    # Loop through each selected row and print the first column value
+    for row in selected_rows:
+        # TODO Remove query
+        values = tree.item(row, 'values')
+        print(values[0])
 
-        # Add an Account for the Employee
-        try:
-            # TODO Check if admin (check first 5 letters == "Admin")
-            query = "INSERT INTO Account VALUES (\"" + usernamevar.get() + "\", \"" + encrypted_password + "\", \"" + \
-                    emailvar.get() + "\", False, " + "(select EmpId from Employee where PhoneNumber = \"" + phonevar.get() + "\"));"
-            cursor = mydb.cursor()
-            cursor.execute(query)
-            mydb.commit()
-            print(cursor.rowcount, "rows were added to the database!")
-        except mysql.connector.IntegrityError as error:
-            print("Couldn't insert the record to the database, an integrity constraint failed!")
-
-        # TODO Add SMTP email
-
-        # Create a label widget to display registration success message
-        message(m="Registration Successful!", color='green')
-    else:
-        message()
+# Create a Frame to hold the buttons
+button_frame = customtkinter.CTkFrame(root)
+button_frame.pack(side=TOP)
 
 
-def loginpopup():
-    # Close window
-    root.destroy()
-    # Run login.py
-    subprocess.run(["python", "../register_and_login_files/login.py"])
 
+# Create a button for exporting the table to a CSV file
+pdf_button = customtkinter.CTkButton(button_frame, text="Export to CSV", command=export_to_csv)
+pdf_button.pack(side=LEFT, padx=10)
 
-# Heading
-customtkinter.CTkLabel(root, text="Register", font=("Arial", 15, "bold")).grid(row=0, column=0, columnspan=10, pady=10)
-customtkinter.CTkLabel(root, text="").grid(row=9, column=0, columnspan=3)
+# Create a Frame to hold the Treeview widget and scrollbar
+frame = customtkinter.CTkFrame(root)
+frame.pack(pady=10, padx=10, fill=BOTH, expand=True)
 
-# Field Name
-name = customtkinter.CTkLabel(root, text="Full Name")
-username = customtkinter.CTkLabel(root, text="Username")
-password = customtkinter.CTkLabel(root, text="Password")
-repeatpassword = customtkinter.CTkLabel(root, text="Repeat Password")
-email = customtkinter.CTkLabel(root, text="Email")
-phone = customtkinter.CTkLabel(root, text="Phone Number")
-address = customtkinter.CTkLabel(root, text="Address")
-login = customtkinter.CTkLabel(root, text="Already have an account? Login now.")
+# Create a Treeview widget to display the data
+tree = ttk.Treeview(frame, show='headings')
+tree.pack(side=LEFT, fill=BOTH, expand=True)
 
-# Packing Fields
-name.grid(row=1, column=0, padx=10, pady=10, sticky="w")
-username.grid(row=2, column=0, padx=10, pady=10, sticky="w")
-password.grid(row=3, column=0, padx=10, pady=10, sticky="w")
-repeatpassword.grid(row=4, column=0, padx=10, pady=10, sticky="w")
-email.grid(row=5, column=0, padx=10, pady=10, sticky="w")
-phone.grid(row=6, column=0, padx=10, pady=10, sticky="w")
-login.grid(row=10, column=0, columnspan=10, padx=10, pady=10)
+# Create a button for removing selected row(s)
+remove_button = customtkinter.CTkButton(button_frame, text="Remove Row", command=lambda: remove_row(tree))
+remove_button.pack(side=LEFT, padx=10)
 
-# Variables for storing data
-namevar = customtkinter.StringVar()
-usernamevar = customtkinter.StringVar()
-passwordvar = customtkinter.StringVar()
-repeatpasswordvar = customtkinter.StringVar()
-emailvar = customtkinter.StringVar()
-phonevar = customtkinter.StringVar()
+# Create a scrollbar
+# scrollbar = customtkinter.CTkScrollbar(master = frame, orientation="vertical", command=tree.yview)
+scrollbar = ttk.Scrollbar(frame, orient=VERTICAL, command=tree.yview)
+scrollbar.pack(side=RIGHT, fill=Y)
+tree.configure(yscrollcommand=scrollbar.set)
 
-# Creating entry field
-nameentry = customtkinter.CTkEntry(root, textvariable=namevar)
-usernameentry = customtkinter.CTkEntry(root, textvariable=usernamevar)
-passwordentry = customtkinter.CTkEntry(root, show='*', textvariable=passwordvar)
-repeatpasswordentry = customtkinter.CTkEntry(root, show='*', textvariable=repeatpasswordvar)
-emailentry = customtkinter.CTkEntry(root, textvariable=emailvar)
-phoneentry = customtkinter.CTkEntry(root, validate="key", textvariable=phonevar)
-# Limit the entry to only numbers
-phoneentry.configure(validatecommand=(phoneentry.register(lambda char: char.isdigit() or char == ""), "%S"))
+# Get all data from the table
+mycursor.execute("SELECT * FROM " + entity)
 
-# Packing entry fields
-nameentry.grid(row=1, column=2, pady=10, sticky="e")
-usernameentry.grid(row=2, column=2, pady=10, sticky="e")
-passwordentry.grid(row=3, column=2, pady=10, sticky="e")
-repeatpasswordentry.grid(row=4, column=2, pady=10, sticky="e")
-emailentry.grid(row=5, column=2, pady=10, sticky="e")
-phoneentry.grid(row=6, column=2, pady=10, sticky="e")
+# Fetch all data
+data = mycursor.fetchall()
 
-# Register button
-customtkinter.CTkButton(master=root, text="Register", command=getvals).grid(row=8, column=1, pady=10)
+# Define columns
+columns = [i[0] for i in mycursor.description]
+tree["columns"] = columns
 
-# Login button
-customtkinter.CTkButton(master=root, text="Login", command=loginpopup).grid(row=11, column=1)
+# Set column headings
+for col in columns:
+    tree.column(col, width=100, anchor=CENTER)
+    tree.heading(col, text=col, anchor=CENTER)
 
+# Insert data into the Treeview widget
+for row in data:
+    tree.insert("", END, values=row)
+
+# Execute the Tkinter event loop
 root.mainloop()
+
+# Close the database connection
+mydb.close()
