@@ -86,48 +86,33 @@ def signup(firstname, lastname, email, username, phonenumber, password):
 
 @eel.expose
 def login(username_email, password):
+    mycursor = mydb.cursor()
+
+    # Check if the email has ".com"
     if ".com" in username_email:
-        try:
-            query = "SELECT username from Account where email=\"" + username_email + "\""
-            cursor = mydb.cursor()
-            cursor.execute(query)
-            empUsername = cursor.fetchall()
-        except mysql.connector.IntegrityError as error:
-            print("Couldn't insert the record to the database, an integrity constraint failed!")
-            return "Username/Email doesn't exist please make sure to sign up."
-        try:
-            query = "SELECT password from Account where email=\"" + username_email + "\""
-            cursor = mydb.cursor()
-            cursor.execute(query)
-            dbpass = cursor.fetchall()
-        except mysql.connector.IntegrityError as error:
-            print("Couldn't insert the record to the database, an integrity constraint failed!")
-            return "Incorrect username/email or password"
-        if str(dbpass[0][0]) == hashlib.sha256(password.encode()).hexdigest():
-            return "Logging In."
-        else:
-            return "Incorrect username/email or password"
+        # Check if the email is found in the Account table
+        mycursor.execute("SELECT * FROM Account WHERE email = %s", (username_email,))
     else:
-        try:
-            query = "SELECT username from Account where username=\"" + username_email + "\""
-            cursor = mydb.cursor()
-            cursor.execute(query)
-            empUsername = cursor.fetchall()
-        except mysql.connector.IntegrityError as error:
-            print("Couldn't insert the record to the database, an integrity constraint failed!")
-            return "Username/Email doesn't exist please make sure to sign up."
-        try:
-            query = "SELECT password from Account where username=\"" + username_email + "\""
-            cursor = mydb.cursor()
-            cursor.execute(query)
-            dbpass = cursor.fetchall()
-        except mysql.connector.IntegrityError as error:
-            print("Couldn't insert the record to the database, an integrity constraint failed!")
-            return "Incorrect username/email or password"
-        if str(dbpass[0][0]) == hashlib.sha256(password.encode()).hexdigest():
+        # Check if the username is found in the Account table
+        mycursor.execute("SELECT * FROM Account WHERE username = %s", (username_email,))
+
+    account = mycursor.fetchone()
+
+    # If the account exists
+    if account:
+        # Encrypt the password
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+        # Get the password from the Account table
+        stored_password = account[1]
+
+        # Check if the passwords match
+        if hashed_password == stored_password:
             return "Logging In."
         else:
-            return "Incorrect username/email or password"
+            return "Incorrect Username/Email or Password."
+    else:
+        return "Account doesn't exist, consider Signing Up?"
 
 
 @eel.expose
