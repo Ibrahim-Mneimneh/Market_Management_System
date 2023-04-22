@@ -28,6 +28,15 @@ except mysql.connector.Error as error:
 
 @eel.expose
 def signup(firstname, lastname, email, username, phonenumber, password):
+    if not (firstname and lastname and email and username and phonenumber and password):
+        return "Please fill all the fields."
+
+    if not len(username.split()) == 1:
+        return "Username cannot have spaces."
+
+    if not ('@' in email and '.' in email.split('@')[1]):
+        return "Enter the email correctly."
+
     mycursor = mydb.cursor()
     mycursor.execute("SELECT EXISTS(SELECT * FROM Account WHERE username = %s)", (username,))
     result = mycursor.fetchone()[0]
@@ -53,8 +62,11 @@ def signup(firstname, lastname, email, username, phonenumber, password):
         return "Password must be at least 8 characters long."
     elif not any(char.isdigit() for char in password):
         return "Password must contain at least 1 digit."
+    elif not any(char.islower() for char in password):
+        return "Password must contain at least 1 lowercase character."
     elif not any(char.isupper() for char in password):
         return "Password must contain at least 1 uppercase character."
+
     encrypted_password = hashlib.sha256(password.encode()).hexdigest()
     print(phonenumber)
     print(firstname)
