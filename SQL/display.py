@@ -1,10 +1,16 @@
-import codecs
+import os
+import subprocess
 import mysql.connector
 from tkinter import *
 from tkinter import ttk
 import customtkinter
 import csv
 import configparser
+
+file_path = "../config.cfg"
+
+if not os.path.exists(file_path):
+    subprocess.run(['python', '../SQL/getSQLpassword.py'])
 
 entity = input("Entity: ")
 
