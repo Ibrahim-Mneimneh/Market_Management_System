@@ -1,3 +1,5 @@
+import configparser
+
 import eel
 import mysql.connector
 import hashlib
@@ -5,13 +7,17 @@ import hashlib
 
 @eel.expose
 def signup(sqlpassword, firstname, lastname, email, username, phonenumber, password):
+    config = configparser.ConfigParser()
+    config.read('../config.cfg')
+
     try:
         mydb = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password=sqlpassword,
+            host=config.get('mysql', 'host'),
+            user=config.get('mysql', 'user'),
+            password=config.get('mysql', 'password'),
             port=3306,
-            database="mms")
+            database=config.get('mysql', 'database')
+        )
     except mysql.connector.Error as error:
         print("Database Connection Failed!")
         quit()
@@ -76,7 +82,7 @@ def login(sqlPassword, username_email, password):
             print("Couldn't insert the record to the database, an integrity constraint failed!")
             return "Username/Email doesn't exist please make sure to sign up."
         try:
-            query = "SELECT password from account where email=\"" + username_email + "\""
+            query = "SELECT password from Account where email=\"" + username_email + "\""
             cursor = mydb.cursor()
             cursor.execute(query)
             dbpass = cursor.fetchall()
@@ -97,7 +103,7 @@ def login(sqlPassword, username_email, password):
             print("Couldn't insert the record to the database, an integrity constraint failed!")
             return "Username/Email doesn't exist please make sure to sign up."
         try:
-            query = "SELECT password from account where username=\"" + username_email + "\""
+            query = "SELECT password from Account where username=\"" + username_email + "\""
             cursor = mydb.cursor()
             cursor.execute(query)
             dbpass = cursor.fetchall()
