@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="/eel.js">
+    </script>
+    <title>Market Management System (Sign up)</title>
+        <link href="signup.css" rel="stylesheet">
+</head>
+<body>
+    <div class="signup">
+        <span>Sign Up</span>
+            <div class="name">
+                <input type="text" placeholder="Firstname" required id="firstname"/>
+                <input type="text" placeholder="Lastname" required id="lastname"/>
+            </div>
+            <input type="text" placeholder="Username" required id="username"/>
+            <input type="email" placeholder="Email" required id="email"/>
+            <input type="number" placeholder="Phone Number" id="phoneNumber"/>
+            <input type="password" placeholder="Password" required id="password"/>
+            <input type="password" placeholder="Confirm Password" required id="confirmPassword"/>
+            <button onclick="submit()">Sign Up</button>
+            <b id="message" style="color:red"></b>
+    </div>
+    <script>var username=document.getElementById("firstname").value;
+        var lastname=document.getElementById("lastname");
+        var username=document.getElementById("username");
+        var email=document.getElementById("email");
+        var phoneNumber=document.getElementById("phoneNumber");
+        var password=document.getElementById("password").value;
+        var confirmPassword=document.getElementById("confirmPassword").value;
+        var error =""
+
+        function routing(newPage){
+        window.close()
+        eel.routing(newPage)
+        }
+        function handleError(text){
+            document.getElementById("message").innerHTML=text;
+            if(text==="Signed up Successfully"){
+            routing("home.html");
+            }
+        }
+        function submit(){
+        password=document.getElementById("password").value;
+        confirmPassword=document.getElementById("confirmPassword").value;
+        if(password!==confirmPassword){
+            document.getElementById("message").innerHTML="Please enter matching passwords."
+        }
+        else{
+            eel.signup(firstname.value,lastname.value,email.value,username.value,phoneNumber.value,password)(handleError);
+            }
+        }
+
+    </script>
+</body>
+</html>

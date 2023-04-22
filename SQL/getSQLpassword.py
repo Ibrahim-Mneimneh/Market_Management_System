@@ -1,19 +1,18 @@
-import configparser
-
 import customtkinter
 import mysql.connector
-import codecs
+import configparser
+
 
 customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
 customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 
 root = customtkinter.CTk()
-root.title("SQL Password")
+root.title("SQL Connection")
 # root.geometry("300x450")
 
 # Centering the window on the screen
-window_width = 250
-window_height = 180
+window_width = 230
+window_height = 320
 x = int(int(root.winfo_screenwidth() / 2) - int(window_width / 2))
 y = int(int(root.winfo_screenheight() / 2) - int(window_height / 2))
 root.geometry(f"{window_width}x{window_height}+{x}+{y}")
@@ -22,78 +21,84 @@ root.geometry(f"{window_width}x{window_height}+{x}+{y}")
 root.resizable(width=False, height=False)
 
 
-def sqlcheck(event=None):
-    def message(m="Please enter the SQL password!", color='red'):
+def getvals():
+    def message(m="Please fill all the fields!", color='red'):
         # Destroy previous message label
-        widgets = root.grid_slaves(row=9, column=0)
+        widgets = root.grid_slaves(row=6, column=0)
         for widget in widgets:
             widget.destroy()
 
         # Create a label widget if the fields are not all filled
-        customtkinter.CTkLabel(master=root, text=m, text_color=color).grid(row=9, column=0, columnspan=3)
+        customtkinter.CTkLabel(master=root, text=m, text_color=color).grid(row=6, column=0, columnspan=3)
 
     # Check if all entry fields are filled
-    if passwordvar.get():
-        config = configparser.ConfigParser()
-        config.read('../config.cfg')
-
+    if uservar.get() and passwordvar.get() and hostvar.get() and databasevar.get():
         try:
             mydb = mysql.connector.connect(
-                host=config.get('mysql', 'host'),
-                user=config.get('mysql', 'user'),
-                password=config.get('mysql', 'password'),
+                host=hostvar.get(),
+                user=uservar.get(),
+                password=passwordvar.get(),
                 port=3306,
-                database=config.get('mysql', 'database')
-        )
+                database=databasevar.get()
+            )
         except mysql.connector.Error as error:
-            print("Database Connection Failed!")
-            quit()
-            mydb.close()
+            message("Database Connection Failed!")
+            return
 
-        # try:
-        #     mydb = mysql.connector.connect(
-        #         host="localhost",
-        #         user="root",
-        #         password=passwordvar.get(),
-        #         port=3306,
-        #         database="mms"
-        #     )
-        # except mysql.connector.Error as error:
-        #     message("Database Connection Failed!")
-        #     return
+        config = configparser.ConfigParser()
+        config['mysql'] = {
+            'user': uservar.get(),
+            'password': passwordvar.get(),
+            'host': hostvar.get(),
+            'database': databasevar.get()
+        }
 
-        message(m="Database Connection Success!", color='green')
+        with open('../config.cfg', 'w') as configfile:
+            config.write(configfile)
 
-        # root.destroy()
-        # print(codecs.encode(passwordvar.get(), 'rot13'))
-        # print(passwordvar.get())
-        with open("../SQL/sqlpassword.txt", "w") as f:
-            # Write the value of the variable to the file
-            # f.write(codecs.encode(passwordvar.get(), 'rot13'))
-            f.write(codecs.encode(config.get('mysql', 'password'), 'rot13'))
-        root.quit()
-        root.withdraw()
+        # Create a label widget to display registration success message
+        message(m="Connection Successful!", color='green')
     else:
         message()
 
 
 # Heading
-customtkinter.CTkLabel(root, text="Enter SQL Password", font=("Arial", 15, "bold")).grid(row=0, column=0, columnspan=10,
-                                                                                         pady=10)
+customtkinter.CTkLabel(root, text="SQL Connection", font=("Arial", 15, "bold")).grid(row=0, column=0, columnspan=10, pady=10)
+customtkinter.CTkLabel(root, text="").grid(row=6, column=0, columnspan=3)
+
+# Field Name
+user = customtkinter.CTkLabel(root, text="User")
+password = customtkinter.CTkLabel(root, text="Password")
+host = customtkinter.CTkLabel(root, text="Host")
+database = customtkinter.CTkLabel(root, text="Database")
+
+
+# Packing Fields
+user.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+password.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+host.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+database.grid(row=4, column=0, padx=10, pady=10, sticky="w")
 
 # Variables for storing data
+uservar = customtkinter.StringVar()
 passwordvar = customtkinter.StringVar()
+hostvar = customtkinter.StringVar()
+databasevar = customtkinter.StringVar()
 
 # Creating entry field
+userentry = customtkinter.CTkEntry(root, textvariable=uservar)
 passwordentry = customtkinter.CTkEntry(root, show='*', textvariable=passwordvar)
+hostentry = customtkinter.CTkEntry(root, textvariable=hostvar)
+databaseentry = customtkinter.CTkEntry(root, textvariable=databasevar)
 
 # Packing entry fields
-passwordentry.grid(row=3, column=1, pady=10, padx=50, sticky="e")
+userentry.grid(row=1, column=2, pady=10, sticky="e")
+passwordentry.grid(row=2, column=2, pady=10, sticky="e")
+hostentry.grid(row=3, column=2, pady=10, sticky="e")
+databaseentry.grid(row=4, column=2, pady=10, sticky="e")
 
-# Bind Enter key press to sqlcheck function
-passwordentry.bind('<Return>', sqlcheck)
+# Connect button
+customtkinter.CTkButton(master=root, text="Connect", command=getvals).grid(row=5, column=0, columnspan=3, pady=10)
 
-# Continue button
-customtkinter.CTkButton(master=root, text="Continue", command=sqlcheck).grid(row=8, column=1, pady=10)
 
 root.mainloop()

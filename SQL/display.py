@@ -8,23 +8,6 @@ import configparser
 
 entity = input("Entity: ")
 
-# file_path = "../SQL/sqlpassword.txt"
-# with open(file_path, "r") as f:
-#     sqlpassword = codecs.decode(f.read(), 'rot13')
-
-# Connect to the database
-# try:
-#     mydb = mysql.connector.connect(
-#         host="localhost",
-#         user="root",
-#         password=sqlpassword,
-#         port=3306,
-#         database="mms"
-#     )
-# except mysql.connector.Error as error:
-#     print("Database Connection Failed!")
-#     quit()
-#     mydb.close()
 
 config = configparser.ConfigParser()
 config.read('../config.cfg')

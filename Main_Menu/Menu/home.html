@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Market Management System (Home)</title>
+        <link href="home.css" rel="stylesheet">
+        <script type="text/javascript" src="/eel.js"></script>
+        <script>
+        function login(){
+            eel.login()
+        }
+        function signup(){
+            eel.signup()
+        }
+        function routing(newPage){
+        eel.routing(newPage)
+        }
+
+        </script>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="./grocery-store .png" alt="image">
+            <span>Market Management System</span>
+        </div>
+        <div class="options">
+            <span>In Store Order</span>
+            <span>Delivery</span>
+        </div>
+    </div>
+    <div class="home">
+        <div class="items">
+            <div class="info">
+                <h2>Labne</h2>
+                <p>
+                    <strong>Price:</strong>
+                </p>
+                <p>
+                    <strong>Quantity:</strong>
+                </p>
+                <!--<span  className="delete">
+                            <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
+                        </span>-->
+            </div>
+            <div class="info">
+                <h2>Jebne</h2>
+                <p>
+                    <strong>Price:</strong>
+                </p>
+                <p>
+                    <strong>Quantity:</strong>
+                </p>
+                <!--<span  className="delete">
+                            <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
+                        </span>-->
+            </div>
+        </div>
+
+        <div class="barcode">
+            <span>Add a new Item</span>
+            <div class="form">
+                <label>Barcode:</label>
+                <input type="text" placeholder="XXXXXX" />
+                <label>Quantity:</label>
+                <input type="text" placeholder="0" />
+            </div>
+            <div class="submit">
+                <button class="add">Add</button>
+                <button class="finish">Finish</button>
+            </div>
+
+        </div>
+
+    </div>
+</body>
+</html>
