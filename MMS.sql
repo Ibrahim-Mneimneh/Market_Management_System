@@ -15,7 +15,7 @@ ALTER TABLE Employee AUTO_INCREMENT=20230000;
 
 -- Create the Promocode table
 create table Promocode (
-Promocode varchar(20) primary key unique,
+Promocode varchar(20) primary key,
 Discount integer not null,
 constraint check (Discount < 50 and Discount > 0)
 );
@@ -36,7 +36,7 @@ constraint check (Price > 0)
 
 -- Create the Item table
 CREATE TABLE Item (
-Barcode INT PRIMARY KEY,
+Barcode bigint PRIMARY KEY,
 Name VARCHAR(50) NOT NULL,
 Price DECIMAL(10,2) NOT NULL,
 leftAmount int Not NULL,
@@ -47,7 +47,7 @@ constraint check (Price > 0)
 -- Relation between Item and order
 create Table Item_Order(
 OrderId INT,
-Barcode INT,
+Barcode bigint,
 Quantity INT not null,
 primary key(OrderId,Barcode),
 foreign key(OrderId) references Orders(OrderId),
@@ -58,13 +58,13 @@ constraint check (Quantity > 0)
 -- Create the Supplier table
 CREATE TABLE Supplier (
   SupplierId INT PRIMARY KEY not null auto_increment,
-  Name VARCHAR(30) NOT NULL,
+  Name VARCHAR(255) NOT NULL,
   phoneNumber varchar(20) NOT NULL unique
 );
 ALTER TABLE Supplier AUTO_INCREMENT=100;
 
 create table Item_Supplier(
-	barcode INT NOT NULL,
+	barcode bigint NOT NULL,
     supplierId INT NOT NULL,
     price decimal(10,2) NOT NULL,
     supplyAmount INT NOT NULL,
@@ -77,7 +77,7 @@ create table Item_Supplier(
 );
 
 create table Account (
-	username varchar(30) primary key unique,
+	username varchar(30) primary key,
     password varchar(64),
     email varchar(255),
     isMan boolean,
@@ -104,6 +104,18 @@ select * from Account;
 
 
 insert into Supplier (Name, phoneNumber) values ("SHARAFELDINE FOR GENERAL TRADE","03316762");
-select * from Supplier;
+insert into Supplier (Name, phoneNumber) values ("HAJJAR FOODS SAL","08500053");
+insert into Supplier (Name, phoneNumber) values ("Modern Markets Distribution Sal","03028377");
+insert into Supplier (Name, phoneNumber) values ("Akiki Brothers","76444327");
 
+insert into Item values (745178984232,"Halawa with Chocolate 800g",2.5,30);
+insert into Item values (745240328773,"Date Jam 400g",1,30);
+insert into Item values (745240328766,"Pear Jam 400g",0.99,10);
+insert into Item values (745240328797,"Strawberry Jam 400g",0.99,0);
+
+insert into Item_Supplier (barcode, supplierId, price, supplyAmount, date) values (745178984232,101,2,30,'2023-04-22');
+
+select * from Item;
+select * from Item_Supplier;
+select * from Supplier;
 select * from Account;
