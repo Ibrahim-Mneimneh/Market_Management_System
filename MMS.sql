@@ -3,56 +3,55 @@ create schema MMS;
 
 -- Create the Employee table
 CREATE TABLE Employee (
-EmpId INT PRIMARY KEY auto_increment,
-Firstname VARCHAR(30) NOT NULL,
-Lastname VARCHAR(30) NOT NULL,
-Salary DECIMAL(10,2) NOT NULL,
-PhoneNumber VARCHAR(20) NOT NULL,
-managerId INT,
-FOREIGN KEY (Managerid) REFERENCES Employee(Empid)
+  EmpId INT PRIMARY KEY auto_increment,
+  Firstname VARCHAR(30) NOT NULL,
+  Lastname VARCHAR(30) NOT NULL,
+  Salary DECIMAL(10,2) NOT NULL,
+  PhoneNumber VARCHAR(20) NOT NULL,
+  managerId INT,
+  FOREIGN KEY (Managerid) REFERENCES Employee(Empid)
 );
 ALTER TABLE Employee AUTO_INCREMENT=20230000;
 
--- Create the Promocode table
 create table Promocode (
-Promocode varchar(20) primary key unique,
-Discount integer not null,
-constraint check (Discount < 50 and Discount > 0)
+	Promocode varchar(20) primary key unique,
+	Discount integer not null,
+    constraint check (Discount < 50 and Discount > 0)
 );
 
 -- Create the Order table
 CREATE TABLE Orders (
-OrderId INT PRIMARY KEY NOT NULL auto_increment,
-Date DATE NOT NULL,
-Price DECIMAL(10,2),
-isOnline BOOLEAN,
-PaymentMethod VARCHAR(20),
-EmpId INT NOT NULL,
-PromoCode varchar(20) unique,
-FOREIGN KEY (EmpId) REFERENCES Employee(EmpId),
-FOREIGN KEY (PromoCode) REFERENCES Promocode(Promocode),
-constraint check (Price > 0)
+  OrderId INT PRIMARY KEY NOT NULL auto_increment,
+  Date DATE NOT NULL,
+  Price DECIMAL(10,2),
+  isOnline BOOLEAN,
+  PaymentMethod VARCHAR(20),
+  EmpId INT NOT NULL,
+  PromoCode varchar(20) unique,
+  FOREIGN KEY (EmpId) REFERENCES Employee(EmpId),
+  FOREIGN KEY (PromoCode) REFERENCES PromoCode(PromoCode),
+  constraint check (Price > 0)
 );
 
 -- Create the Item table
 CREATE TABLE Item (
-Barcode INT PRIMARY KEY,
-Name VARCHAR(50) NOT NULL,
-Price DECIMAL(10,2) NOT NULL,
-leftAmount int Not NULL,
-constraint check (leftAmount >= 0),
-constraint check (Price > 0)
+  Barcode INT PRIMARY KEY,
+  Name VARCHAR(50) NOT NULL,
+  Price DECIMAL(10,2) NOT NULL,
+  leftAmount int Not NULL,
+  constraint check (leftAmount >= 0),
+  constraint check (Price > 0)
 );
 
 -- Relation between Item and order
 create Table Item_Order(
 OrderId INT,
-Barcode INT,
-Quantity INT not null,
-primary key(OrderId,Barcode),
-foreign key(OrderId) references Orders(OrderId),
-foreign key(Barcode) references Item(Barcode),
-constraint check (Quantity > 0)
+barcode INT,
+quantity INT not null,
+primary key(orderId,barcode),
+foreign key(orderId) references orders(orderId),
+foreign key(barcode) references Item(barcode),
+constraint check (quantity > 0)
 );
 
 -- Create the Supplier table
