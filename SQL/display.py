@@ -3,45 +3,7 @@ import hashlib
 import subprocess
 import customtkinter
 import mysql.connector
-import codecs
-import os
-import atexit
 
-
-def on_exit():
-    print("Program is exiting!")
-    file_path = "../SQL/sqlpassword.txt"
-    if os.path.exists(file_path):
-        os.remove(file_path)
-        print("File removed!")
-    else:
-        print("File does not exist.")
-
-
-atexit.register(on_exit)
-
-sqlpassword = ""
-
-
-def readpassword():
-    global sqlpassword
-    file_path = "../SQL/sqlpassword.txt"
-    if os.path.exists(file_path):
-        if os.path.getsize(file_path) > 0:
-            with open(file_path, "r") as f:
-                sqlpassword = codecs.decode(f.read(), 'rot13')
-                return True
-        else:
-            print("File is empty.")
-            subprocess.run(['python', '../SQL/getSQLpassword.py'])
-    else:
-        print("File does not exist.")
-        subprocess.run(['python', '../SQL/getSQLpassword.py'])
-    return False
-
-
-while not readpassword():
-    readpassword()
 
     # result = subprocess.run(['python', '../SQL/getSQLpassword.py'], capture_output=True, text=True)
     # sqlpassword = result.stdout.strip()
@@ -60,21 +22,21 @@ while not readpassword():
     #     quit()
     #     mydb.close()
 
-    config = configparser.ConfigParser()
-    config.read('../config.cfg')
+config = configparser.ConfigParser()
+config.read('../config.cfg')
 
-    try:
-        mydb = mysql.connector.connect(
-            host=config.get('mysql', 'host'),
-            user=config.get('mysql', 'user'),
-            password=config.get('mysql', 'password'),
-            port=3306,
-            database=config.get('mysql', 'database')
-        )
-    except mysql.connector.Error as error:
-        print("Database Connection Failed!")
-        quit()
-        mydb.close()
+try:
+    mydb = mysql.connector.connect(
+        host=config.get('mysql', 'host'),
+        user=config.get('mysql', 'user'),
+        password=config.get('mysql', 'password'),
+        port=3306,
+        database=config.get('mysql', 'database')
+    )
+except mysql.connector.Error as error:
+    print("Database Connection Failed!")
+    quit()
+    mydb.close()
 
 customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
 customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
