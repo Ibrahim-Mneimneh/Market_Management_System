@@ -9,7 +9,7 @@
 </head>
 <body>
     <div class="signup">
-        <span>Signup</span>
+        <span>Sign Up</span>
             <div class="name">
                 <input type="text" placeholder="Firstname" required id="firstname"/>
                 <input type="text" placeholder="Lastname" required id="lastname"/>
@@ -19,7 +19,7 @@
             <input type="tel" placeholder="Phone Number" id="phoneNumber"/>
             <input type="password" placeholder="Password" required id="password"/>
             <input type="password" placeholder="Confirm Password" required id="confirmPassword"/>
-            <button onclick="submit()">Signup</button>
+            <button onclick="submit()">Sign Up</button>
             <b id="message" style="color:red"></b>
     </div>
     <script>var username=document.getElementById("firstname").value;
@@ -48,7 +48,7 @@
             document.getElementById("message").innerHTML="Please enter matching passwords."
         }
         else{
-            eel.signup("Ib97mn69ji*",firstname.value,lastname.value,email.value,username.value,phoneNumber.value,password)(handleError);
+            eel.signup(firstname.value,lastname.value,email.value,username.value,phoneNumber.value,password)(handleError);
             }
         }
 
