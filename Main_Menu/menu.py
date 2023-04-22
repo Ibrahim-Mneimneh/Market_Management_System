@@ -25,6 +25,9 @@ except mysql.connector.Error as error:
     quit()
     mydb.close()
 
+# todo get profit from manager gui (expenses, total salaries) and matplotlib
+# todo manager request items from suppliers
+# todo order function
 
 @eel.expose
 def signup(firstname, lastname, email, username, phonenumber, password):
@@ -101,7 +104,7 @@ def login(username_email, password):
     mycursor = mydb.cursor()
 
     # Check if the email has ".com"
-    if ".com" in username_email:
+    if '@' in username_email and '.' in username_email.split('@')[1]:
         # Check if the email is found in the Account table
         mycursor.execute("SELECT * FROM Account WHERE email = %s", (username_email,))
     else:
