@@ -5,9 +5,21 @@
     <title>Market Management System (Login)</title>
         <link href="login.css" rel="stylesheet">
         <script type="text/javascript" src="/eel.js"></script>
+
+</head>
+<body>
+    <div class="login">
+        <span>Login</span>
+        <input type="text" placeholder="Username or Email" required id="username_email"></input>
+        <input type="password" placeholder="Password" required id="password"></input>
+        <button onclick="submit()">Login</button>
+        <b id="message" style="color:red"></b>
+
         <script>
         var error ="";
         document.getElementById('message').innerHTML = error;
+        var username_email =document.getElementById('username_email');
+        var password =document.getElementById('password');
         function login(){
             error =eel.login()
         }
@@ -15,19 +27,21 @@
             eel.signup()
         }
         function routing(newPage){
+        window.close()
         eel.routing(newPage)
         }
+        function handleError(text){
+            document.getElementById("message").innerHTML=text;
+            if(text==="Logging In."){
+            routing("home.html");
+            }
+        }
+        function submit(){
+            eel.login("Ib97mn69ji*",username_email.value,password.value)(handleError);
+        }
+
 
         </script>
-</head>
-<body>
-    <div class="login">
-        <span>Login</span>
-        <input type="text" placeholder="Username" required></input>
-        <input type="password" placeholder="Password" required></input>
-        <button>Login</button>
-        <b id="message"></b>
-
     </div>
 </body>
 </html>
