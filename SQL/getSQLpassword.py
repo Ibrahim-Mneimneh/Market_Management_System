@@ -89,7 +89,7 @@ databasevar = customtkinter.StringVar()
 userentry = customtkinter.CTkEntry(root, textvariable=uservar)
 passwordentry = customtkinter.CTkEntry(root, show='*', textvariable=passwordvar)
 hostentry = customtkinter.CTkEntry(root, textvariable=hostvar)
-databaseentry = customtkinter.CTkEntry(root, validate="key", textvariable=databasevar)
+databaseentry = customtkinter.CTkEntry(root, textvariable=databasevar)
 
 # Packing entry fields
 userentry.grid(row=1, column=2, pady=10, sticky="e")
