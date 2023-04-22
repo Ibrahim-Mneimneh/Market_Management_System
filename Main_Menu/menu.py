@@ -76,7 +76,7 @@ def login(sqlPassword, username_email, password):
             print("Couldn't insert the record to the database, an integrity constraint failed!")
             return "Username/Email doesn't exist please make sure to sign up."
         try:
-            query = "SELECT password from account where email=\"" + username_email + "\""
+            query = "SELECT password from Account where email=\"" + username_email + "\""
             cursor = mydb.cursor()
             cursor.execute(query)
             dbpass = cursor.fetchall()
@@ -97,7 +97,7 @@ def login(sqlPassword, username_email, password):
             print("Couldn't insert the record to the database, an integrity constraint failed!")
             return "Username/Email doesn't exist please make sure to sign up."
         try:
-            query = "SELECT password from account where username=\"" + username_email + "\""
+            query = "SELECT password from Account where username=\"" + username_email + "\""
             cursor = mydb.cursor()
             cursor.execute(query)
             dbpass = cursor.fetchall()
