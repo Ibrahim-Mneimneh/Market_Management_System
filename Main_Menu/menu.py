@@ -8,7 +8,7 @@ import hashlib
 file_path = "../config.cfg"
 
 if not os.path.exists(file_path):
-    subprocess.run(['python', '../SQL/getSQLpassword.py'])
+    subprocess.run(['python', '../SQL/SQLprompt.py'])
 
 config = configparser.ConfigParser()
 config.read(file_path)

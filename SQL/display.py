@@ -11,7 +11,7 @@ from tkinter import filedialog
 file_path = "../config.cfg"
 
 if not os.path.exists(file_path):
-    subprocess.run(['python', '../SQL/getSQLpassword.py'])
+    subprocess.run(['python', '../SQL/SQLprompt.py'])
 
 entity = input("Entity: ")
 
