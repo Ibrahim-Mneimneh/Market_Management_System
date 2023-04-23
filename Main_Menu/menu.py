@@ -4,6 +4,7 @@ import subprocess
 import eel
 import mysql.connector
 import hashlib
+from SQL.display import displayEntity
 
 file_path = "../config.cfg"
 
