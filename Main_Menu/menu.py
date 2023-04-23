@@ -101,6 +101,9 @@ def signup(firstname, lastname, email, username, phonenumber, password):
 
 @eel.expose
 def login(username_email, password):
+    if not (username_email and password):
+        return "Please fill all the fields."
+
     mycursor = mydb.cursor()
 
     # Check if the email has ".com"
@@ -127,7 +130,7 @@ def login(username_email, password):
         else:
             return "Incorrect Username/Email or Password."
     else:
-        return "Account doesn't exist, consider Signing Up?"
+        return "Incorrect Username/Email or Password."
 
 
 @eel.expose

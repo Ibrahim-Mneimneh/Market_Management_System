@@ -6,6 +6,7 @@ from tkinter import ttk
 import customtkinter
 import csv
 import configparser
+from tkinter import filedialog
 
 file_path = "../config.cfg"
 
@@ -13,7 +14,6 @@ if not os.path.exists(file_path):
     subprocess.run(['python', '../SQL/getSQLpassword.py'])
 
 entity = input("Entity: ")
-
 
 config = configparser.ConfigParser()
 config.read('../config.cfg')
@@ -47,9 +47,6 @@ root.title(entity + " Table View")
 
 
 def export_to_csv():
-    # Create cursor
-    mycursor = mydb.cursor()
-
     # Fetch data from the table
     mycursor.execute("SELECT * FROM " + entity)
     data = mycursor.fetchall()
@@ -58,8 +55,10 @@ def export_to_csv():
     mycursor.execute("SHOW COLUMNS FROM " + entity)
     columns = [col[0] for col in mycursor.fetchall()]
 
+    browse_path = filedialog.asksaveasfilename(defaultextension=".csv", initialfile=entity, filetypes=[("CSV files", "*.csv")])
+
     # Open a CSV file for writing
-    with open(entity + '.csv', mode='w', newline='') as csv_file:
+    with open(browse_path, mode='w', newline='') as csv_file:
         # Create a CSV writer object
         writer = csv.writer(csv_file)
 
@@ -73,6 +72,7 @@ def export_to_csv():
     # Close the CSV file
     csv_file.close()
 
+
 def remove_row(tree):
     # Get the selected row(s)
     selected_rows = tree.selection()
@@ -83,11 +83,10 @@ def remove_row(tree):
         values = tree.item(row, 'values')
         print(values[0])
 
+
 # Create a Frame to hold the buttons
 button_frame = customtkinter.CTkFrame(root)
 button_frame.pack(side=TOP)
-
-
 
 # Create a button for exporting the table to a CSV file
 pdf_button = customtkinter.CTkButton(button_frame, text="Export to CSV", command=export_to_csv)
@@ -111,11 +110,15 @@ scrollbar = ttk.Scrollbar(frame, orient=VERTICAL, command=tree.yview)
 scrollbar.pack(side=RIGHT, fill=Y)
 tree.configure(yscrollcommand=scrollbar.set)
 
-# Get all data from the table
-mycursor.execute("SELECT * FROM " + entity)
+try:
+    # Get all data from the table
+    mycursor.execute("SELECT * FROM " + entity)
 
-# Fetch all data
-data = mycursor.fetchall()
+    # Fetch all data
+    data = mycursor.fetchall()
+except:
+    print("Table not found.")
+    quit()
 
 # Define columns
 columns = [i[0] for i in mycursor.description]
