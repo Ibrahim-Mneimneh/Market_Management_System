@@ -55,22 +55,24 @@ def export_to_csv():
     mycursor.execute("SHOW COLUMNS FROM " + entity)
     columns = [col[0] for col in mycursor.fetchall()]
 
-    browse_path = filedialog.asksaveasfilename(defaultextension=".csv", initialfile=entity, filetypes=[("CSV files", "*.csv")])
+    browse_path = filedialog.asksaveasfilename(defaultextension=".csv", initialfile=entity,
+                                               filetypes=[("CSV files", "*.csv")])
 
-    # Open a CSV file for writing
-    with open(browse_path, mode='w', newline='') as csv_file:
-        # Create a CSV writer object
-        writer = csv.writer(csv_file)
+    if not browse_path == '':
+        # Open a CSV file for writing
+        with open(browse_path, mode='w', newline='') as csv_file:
+            # Create a CSV writer object
+            writer = csv.writer(csv_file)
 
-        # Write the column names to the CSV file
-        writer.writerow(columns)
+            # Write the column names to the CSV file
+            writer.writerow(columns)
 
-        # Write the data to the CSV file
-        for row in data:
-            writer.writerow(row)
+            # Write the data to the CSV file
+            for row in data:
+                writer.writerow(row)
 
-    # Close the CSV file
-    csv_file.close()
+        # Close the CSV file
+        csv_file.close()
 
 
 def remove_row(tree):
