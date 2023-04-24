@@ -112,9 +112,7 @@ def displayEntity(entity_input, username):
             email_receiver = row[0]
             # Set the subject and body of the email
             subject = entity + ' CSV Export'
-            body = """
-                As requested, here is the CSV of the entity you exported.
-                """
+            body = "As requested, here is the CSV of the " + entity + " entity you exported."
             # Define the file path and name to attach to the email
             attachment_file_path = os.path.join(os.path.dirname(browse_path), entity + '.csv')
             # Set up the email message with attachment
@@ -134,6 +132,8 @@ def displayEntity(entity_input, username):
             with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
                 smtp.login(email_sender, email_password)
                 smtp.sendmail(email_sender, email_receiver, em.as_string())
+
+            print("Email Sent!")
 
 
     def remove_row(tree):
@@ -212,4 +212,4 @@ def displayEntity(entity_input, username):
     mydb.close()
 
 
-displayEntity("Account", 'zouheirn')
+displayEntity("Employee", 'zouheirn')
