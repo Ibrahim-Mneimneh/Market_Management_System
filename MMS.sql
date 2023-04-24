@@ -8,7 +8,7 @@ Firstname VARCHAR(30) NOT NULL,
 Lastname VARCHAR(30) NOT NULL,
 Salary DECIMAL(10,2) NOT NULL,
 PhoneNumber VARCHAR(20) NOT NULL,
-managerId INT,
+managerId INT DEFAULT 20230000,
 FOREIGN KEY (Managerid) REFERENCES Employee(Empid)
 );
 ALTER TABLE Employee AUTO_INCREMENT=20230000;
@@ -97,7 +97,7 @@ CREATE TABLE Customer (
   PRIMARY KEY (CustomerId, orderid)
 );
 
-insert into Employee (Firstname, Lastname, Salary, PhoneNumber) values ("Hadi", "Al Mubasher", 1000.0, "03454123");
+insert into Employee (Firstname, Lastname, Salary, PhoneNumber, managerId) values ("Hadi", "Al Mubasher", 1000.0, "03454123",null);
 INSERT INTO Account VALUES ("hadim", "sueuksegishag748493", "h@gmail.com", True, (select EmpId from Employee where PhoneNumber = "03454123"));
 select * from Employee;
 select * from Account;
