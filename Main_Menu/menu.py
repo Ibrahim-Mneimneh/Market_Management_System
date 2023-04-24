@@ -4,9 +4,11 @@ import subprocess
 import eel
 import mysql.connector
 import hashlib
+from win32api import GetSystemMetrics
+
 
 file_path = "../config.cfg"
-
+prop=""
 if not os.path.exists(file_path):
     subprocess.run(['python', '../SQL/getSQLpassword.py'])
 
@@ -80,7 +82,7 @@ def signup(firstname, lastname, email, username, phonenumber, password):
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
-        print(cursor.rowcount, "rows were added to the database!")
+        print("Employee "+firstname+" "+lastname+" was added.")
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
         return "PhoneNumber is already in use"
@@ -92,7 +94,7 @@ def signup(firstname, lastname, email, username, phonenumber, password):
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
-        print(cursor.rowcount, "rows were added to the database!")
+        print(username+" Account was created Successfully!")
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
         return "Username or email may be already in use."
@@ -103,7 +105,7 @@ def signup(firstname, lastname, email, username, phonenumber, password):
 def login(username_email, password):
     mycursor = mydb.cursor()
 
-    # Check if the email has ".com"
+    # Check if the email has "@"
     if '@' in username_email and '.' in username_email.split('@')[1]:
         # Check if the email is found in the Account table
         mycursor.execute("SELECT * FROM Account WHERE email = %s", (username_email,))
@@ -131,11 +133,54 @@ def login(username_email, password):
 
 
 @eel.expose
+def addOrder(qrCode, quantity):
+    if len(qrCode) != len(quantity):
+        return "Please select a quantity for each item"
+    for item, itemQuantity in qrCode, quantity:
+        mycursor = mydb.cursor()
+        mycursor.execute("SELECT EXISTS(SELECT qrcode FROM item WHERE qrcode = %s)", (item,))
+        result = mycursor.fetchone()[0]
+        if result != 1:
+            return "The item '"+item+"' doesn't exist."
+        mycursor = mydb.cursor()
+        mycursor.execute("SELECT leftAmount FROM  WHERE qrcode = %s)", (item,))
+        result = mycursor.fetchone()[0]
+        if result < itemQuantity:
+            return "Requested amount of '"+item+"' is not available. Available amount is "+result
+    # After checking for every item in the order we start adding them
+    for item, itemQuantity in qrCode, quantity:
+        try:
+            query = "Insert into order "
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+            print(cursor.rowcount, " row was added to Orders Table.")
+        except mysql.connector.IntegrityError as error:
+            print("Couldn't insert the record to the database, an integrity constraint failed!")
+
+
+
+
+@eel.expose
+def passProps():
+    return prop
+
+
+@eel.expose
 def routing(newpage):
     eel.show(newpage)
 
 
-page = "menu.html"
+@eel.expose
+def getProps(props):
+    global prop
+    prop = props
+
+
+
+
+
+page = "home.html"
 
 eel.init("Menu")
-eel.start(page)
+eel.start(page, size=(GetSystemMetrics(0), GetSystemMetrics(1)))

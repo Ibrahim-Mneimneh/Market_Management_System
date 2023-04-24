@@ -6,16 +6,14 @@
         <link href="home.css" rel="stylesheet">
         <script type="text/javascript" src="/eel.js"></script>
         <script>
-        function login(){
-            eel.login()
+        eel.passProps()(receivedData);
+        function routing(newPage,props){
+        eel.routing(newPage,props)
         }
-        function signup(){
-            eel.signup()
+        function receivedData(props){
+            props= "Welcome "+props;
+            document.getElementById("account").innerHTML=props;
         }
-        function routing(newPage){
-        eel.routing(newPage)
-        }
-
         </script>
 </head>
 <body>
@@ -31,6 +29,7 @@
     </div>
     <div class="home">
         <div class="items">
+            <b id="account"></b>
             <div class="info">
                 <h2>Labne</h2>
                 <p>
@@ -39,9 +38,9 @@
                 <p>
                     <strong>Quantity:</strong>
                 </p>
-                <!--<span  className="delete">
-                            <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
-                        </span>-->
+                <div class="delete">
+                    <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
+                </div>
             </div>
             <div class="info">
                 <h2>Jebne</h2>
@@ -51,9 +50,33 @@
                 <p>
                     <strong>Quantity:</strong>
                 </p>
-                <!--<span  className="delete">
-                            <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
-                        </span>-->
+                <div class="delete">
+                    <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
+                </div>
+            </div>
+            <div class="info">
+                <h2>Jebne</h2>
+                <p>
+                    <strong>Price:</strong>
+                </p>
+                <p>
+                    <strong>Quantity:</strong>
+                </p>
+                <div class="delete">
+                    <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
+                </div>
+            </div>
+            <div class="info">
+                <h2>Jebne</h2>
+                <p>
+                    <strong>Price:</strong>
+                </p>
+                <p>
+                    <strong>Quantity:</strong>
+                </p>
+                <div class="delete">
+                    <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
+                </div>
             </div>
         </div>
 
@@ -61,9 +84,9 @@
             <span>Add a new Item</span>
             <div class="form">
                 <label>Barcode:</label>
-                <input type="text" placeholder="XXXXXX" />
+                <input type="number" placeholder="XXXXXXXX" />
                 <label>Quantity:</label>
-                <input type="text" placeholder="0" />
+                <input type="number" placeholder="0" />
             </div>
             <div class="submit">
                 <button class="add">Add</button>
@@ -71,7 +94,6 @@
             </div>
 
         </div>
-
     </div>
 </body>
 </html>

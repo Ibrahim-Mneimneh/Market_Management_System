@@ -54,7 +54,7 @@ body {
   font-weight: 400;
   background-color: #f1f1f1;
   width: 100%;
-  height: 93vh;
+  min-height: 93vh;
 }
 
 .barcode {
@@ -137,16 +137,43 @@ button {
 }
 .info h2 {
   margin: 0 0 10px 0;
-  font-size: 1.2em;
+  font-size: 30px;
   color: #1aac83;
 }
-.info p {
+ .info p strong{
   margin: 0;
-  font-size: 0.9em;
+  font-size: 22px;
   color: #555;
 }
 .info span {
   position: absolute;
   top: 20px;
   right: 20px;
+}
+#account{
+color: #1aac83;
+font-size:30px;
+}
+.delete {
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+}
+.delete > img {
+  justify-content: end;
+  width: 25px;
+  height: 25px;
+  border: none;
+  border-radius: 5px;
+  padding: 1px;
+  padding-bottom: 0px;
+  padding-top: 5px;
+}
+.delete > img:hover {
+  background-color: rgb(222, 222, 222);
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
