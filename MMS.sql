@@ -97,7 +97,7 @@ CREATE TABLE Customer (
   PRIMARY KEY (CustomerId, orderid)
 );
 
-insert into Employee (Firstname, Lastname, Salary, PhoneNumber) values ("Hadi", "Al Mubasher", 1000.0, "03454123",null);
+insert into Employee (Firstname, Lastname, Salary, PhoneNumber, managerId) values ("Hadi", "Al Mubasher", 1000.0, "03454123",null);
 INSERT INTO Account VALUES ("hadim", "sueuksegishag748493", "h@gmail.com", True, (select EmpId from Employee where PhoneNumber = "03454123"));
 select * from Employee;
 select * from Account;
