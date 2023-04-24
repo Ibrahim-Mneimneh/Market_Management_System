@@ -140,4 +140,3 @@ def displayEntity(entity_input):
     # Close the database connection
     mydb.close()
 
-displayEntity("")
