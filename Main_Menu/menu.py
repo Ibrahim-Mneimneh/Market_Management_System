@@ -177,9 +177,6 @@ def getProps(props):
     prop = props
 
 
-
-
-
 page = "home.html"
 
 eel.init("Menu")
