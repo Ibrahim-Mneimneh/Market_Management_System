@@ -114,7 +114,6 @@ def login(username_email, password):
         mycursor.execute("SELECT * FROM Account WHERE username = %s", (username_email,))
 
     account = mycursor.fetchone()
-
     # If the account exists
     if account:
         # Encrypt the password
@@ -125,6 +124,13 @@ def login(username_email, password):
 
         # Check if the passwords match
         if hashed_password == stored_password:
+            query = "Select firstname, lastname from Employee as e join Account as acc on e.empId=acc.empId where " \
+                   "username=\""+account[0]+"\" "
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            fullname = cursor.fetchone()
+            global prop
+            prop = fullname[0]+" "+fullname[1]
             return "Logging In."
         else:
             return "Incorrect Username/Email or Password."
@@ -177,7 +183,7 @@ def getProps(props):
     prop = props
 
 
-page = "home.html"
+page = "menu.html"
 
 eel.init("Menu")
 eel.start(page, size=(GetSystemMetrics(0), GetSystemMetrics(1)))

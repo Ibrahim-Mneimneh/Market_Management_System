@@ -37,7 +37,7 @@
         function handleError(text){
             document.getElementById("message").innerHTML=text;
             if(text==="Signed up Successfully"){
-            eel.getProps(username_email.value);
+            eel.getProps(firstname.value+" "+lastname.value);
             routing("home.html");
             }
         }
