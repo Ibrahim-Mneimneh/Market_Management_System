@@ -42,7 +42,7 @@ def displayEntity(entity_input, username):
     root = customtkinter.CTk()
 
     customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
-    customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
+    customtkinter.set_default_color_theme("green")  # Themes: blue (default), dark-blue, green
 
     # # Maximize the window
     # root.state('zoomed')
