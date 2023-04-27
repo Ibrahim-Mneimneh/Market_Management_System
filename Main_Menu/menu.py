@@ -5,7 +5,7 @@ import eel
 import mysql.connector
 import hashlib
 from win32api import GetSystemMetrics
-
+from datetime import date
 
 file_path = "../config.cfg"
 prop=""
@@ -139,10 +139,11 @@ def login(username_email, password):
 
 
 @eel.expose
-def addOrder(qrCode, quantity):
+def addOrder(qrCode, quantity, employeeReference):
     if len(qrCode) != len(quantity):
         return "Please select a quantity for each item"
-    for item, itemQuantity in qrCode, quantity:
+    #check if all items are present
+    for item, itemQuantity in zip(qrCode, quantity):
         mycursor = mydb.cursor()
         mycursor.execute("SELECT EXISTS(SELECT qrcode FROM item WHERE qrcode = %s)", (item,))
         result = mycursor.fetchone()[0]
@@ -153,16 +154,32 @@ def addOrder(qrCode, quantity):
         result = mycursor.fetchone()[0]
         if result < itemQuantity:
             return "Requested amount of '"+item+"' is not available. Available amount is "+result
-    # After checking for every item in the order we start adding them
-    for item, itemQuantity in qrCode, quantity:
+    # Create the order
+    currentDate = str(date.today())
+    try:
+        query = "Insert into order(date,price,isOnline) values(\"" + currentDate + "\"," + 1 + ",true)"
+        cursor = mydb.cursor()
+        cursor.execute(query)
+        mydb.commit()
+        print("New Order created Successfully!!")
+    except mysql.connector.IntegrityError as error:
+        print("Couldn't insert the record to the database, an integrity constraint failed!")
+
+    # TO DO grab the order id to insert it on each Order-Item relation
+
+    # Add the items into the order
+    for item, itemQuantity in zip(qrCode, quantity):
         try:
-            query = "Insert into order "
+            query = "Insert into Order_Item(OrderId,barCode,quantity) values(\"" +  + "\",\"" + item + "\",\""+quantity+"\")"
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
-            print(cursor.rowcount, " row was added to Orders Table.")
+            print("New Order created Successfully!!")
         except mysql.connector.IntegrityError as error:
             print("Couldn't insert the record to the database, an integrity constraint failed!")
+
+
+
 
 
 
