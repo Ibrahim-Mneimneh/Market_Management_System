@@ -26,7 +26,6 @@ CREATE TABLE Orders (
   Date DATE NOT NULL,
   Price DECIMAL(10,2),
   isOnline BOOLEAN,
-  PaymentMethod VARCHAR(20),
   EmpId INT NOT NULL,
   PromoCode varchar(20) unique,
   FOREIGN KEY (EmpId) REFERENCES Employee(EmpId) on delete set null,
