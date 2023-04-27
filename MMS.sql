@@ -22,16 +22,16 @@ constraint check (Discount < 50 and Discount > 0)
 
 -- Create the Order table
 CREATE TABLE Orders (
-OrderId INT PRIMARY KEY NOT NULL auto_increment,
-Date DATE NOT NULL,
-Price DECIMAL(10,2),
-isOnline BOOLEAN,
-PaymentMethod VARCHAR(20),
-EmpId INT NOT NULL,
-PromoCode varchar(20) unique,
-FOREIGN KEY (EmpId) REFERENCES Employee(EmpId),
-FOREIGN KEY (PromoCode) REFERENCES Promocode(Promocode),
-constraint check (Price > 0)
+  OrderId INT PRIMARY KEY NOT NULL auto_increment,
+  Date DATE NOT NULL,
+  Price DECIMAL(10,2),
+  isOnline BOOLEAN,
+  PaymentMethod VARCHAR(20),
+  EmpId INT NOT NULL,
+  PromoCode varchar(20) unique,
+  FOREIGN KEY (EmpId) REFERENCES Employee(EmpId) on delete set null,
+  FOREIGN KEY (PromoCode) REFERENCES PromoCode(PromoCode) on delete set null,
+  constraint check (Price > 0)
 );
 
 -- Create the Item table
@@ -47,12 +47,12 @@ constraint check (Price > 0)
 -- Relation between Item and order
 create Table Item_Order(
 OrderId INT,
-Barcode bigint,
-Quantity INT not null,
-primary key(OrderId,Barcode),
-foreign key(OrderId) references Orders(OrderId),
-foreign key(Barcode) references Item(Barcode),
-constraint check (Quantity > 0)
+barcode INT,
+quantity INT not null,
+primary key(orderId,barcode),
+foreign key(orderId) references orders(orderId),
+foreign key(barcode) references Item(barcode) on delete set null,
+constraint check (quantity > 0)
 );
 
 -- Create the Supplier table
@@ -64,25 +64,25 @@ CREATE TABLE Supplier (
 ALTER TABLE Supplier AUTO_INCREMENT=100;
 
 create table Item_Supplier(
-	barcode bigint NOT NULL,
+    barcode INT NOT NULL,
     supplierId INT NOT NULL,
     price decimal(10,2) NOT NULL,
     supplyAmount INT NOT NULL,
     date DATE not null,
     FOREIGN KEY (barcode) REFERENCES Item(barcode),
-    FOREIGN KEY (supplierId) REFERENCES Supplier(supplierId),
+    FOREIGN KEY (supplierId) REFERENCES Supplier(supplierId) on delete cascade,
     primary key(barcode,supplierId, date),
     constraint check (price > 0),
     constraint check (supplyAmount > 0)
 );
 
 create table Account (
-	username varchar(30) primary key,
+    username varchar(30) primary key unique,
     password varchar(64),
     email varchar(255),
     isMan boolean,
     empId INT not null unique,
-    FOREIGN KEY (empId) REFERENCES Employee(Empid)
+    FOREIGN KEY (empId) REFERENCES Employee(Empid) on delete cascade
 );
 
 
