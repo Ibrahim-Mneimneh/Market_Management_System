@@ -178,7 +178,7 @@ def add_order(qrCode, quantity, empUsername, promoCode):
     # Add the items into the order
     for item, itemQuantity in zip(qrCode, quantity):
         try:
-            query = "Insert into Order_Item(OrderId,barCode,quantity) values(" + order_id[0] + ",\"" + item + "\",\""+quantity+"\")"
+            query = "Insert into Order_Item(OrderId,barCode,quantity) values(" + order_id[0] + "\"," + item + "\",\""+quantity+"\")"
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
@@ -211,6 +211,31 @@ def add_order(qrCode, quantity, empUsername, promoCode):
         return "Order created Successfully!"
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
+
+
+@eel.expose
+def add_delivery_order(qrCode, quantity, empUsername, promoCode, firstname, lastname, phoneNumber, address):
+    # use add order to add an order
+    add_order(qrCode, quantity, empUsername, promoCode)
+    try:
+        query = "select distinct(last_insert_id()) from Item;"
+        cursor = mydb.cursor()
+        cursor.execute(query)
+        order_id = cursor.fetchone()
+    except mysql.connector.IntegrityError as error:
+        print("Couldn't insert the record to the database, an integrity constraint failed!")
+        return "Failed to link customer to his order."
+    try:
+        query = "Insert into customer(firstname,lastname,phoneNumber,address,orderId) values(\""+firstname+"\",\""+lastname +\
+                "\",\""+phoneNumber+"\",\""+address+"\","+order_id[0]+")"
+        cursor = mydb.cursor()
+        cursor.execute(query)
+        mydb.commit()
+        print("Customer "+firstname+" "+lastname + "'s order was added Successfully!")
+        return "Customer's order was added Successfully!"
+    except mysql.connector.IntegrityError as error:
+        print("Couldn't insert the record to the database, an integrity constraint failed!")
+
 
 @eel.expose
 def passProps():
