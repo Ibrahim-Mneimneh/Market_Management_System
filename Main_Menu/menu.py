@@ -139,25 +139,30 @@ def login(username_email, password):
 
 
 @eel.expose
-def add_order(qrCode, quantity, empUsername):
+def add_order(qrCode, quantity, empUsername, promoCode):
     if len(qrCode) != len(quantity):
         return "Please select a quantity for each item"
-    # check if all items are present
+    # check if all items are present with requested quantities
     for item, itemQuantity in zip(qrCode, quantity):
         mycursor = mydb.cursor()
-        mycursor.execute("SELECT EXISTS(SELECT qrcode FROM item WHERE qrcode = %s)", (item,))
+        mycursor.execute("SELECT EXISTS(SELECT qrcode FROM item WHERE barCode = %s)", (item,))
         result = mycursor.fetchone()[0]
         if result != 1:
             return "The item '"+item+"' doesn't exist."
         mycursor = mydb.cursor()
-        mycursor.execute("SELECT leftAmount FROM  WHERE qrcode = %s)", (item,))
+        mycursor.execute("SELECT leftAmount FROM item WHERE barCode = %s)", (item,))
         result = mycursor.fetchone()[0]
         if result < itemQuantity:
             return "Requested amount of '"+item+"' is not available. Available amount is "+result
-    # Create the order
+    # Create the order, we need to grab the employee's ID first
     currentDate = str(date.today())
     try:
-        query = "Insert into orders(date,price,isOnline) values(\"" + currentDate + "\"," + 1 + ",true)"
+        query = "Select empId from Employee as e join Account as acc on e.empId=acc.empId where " \
+                "username=\"" + empUsername + "\" "
+        cursor = mydb.cursor()
+        cursor.execute(query)
+        empId = cursor.fetchone()
+        query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\"," + 1 + ",true,"+empId[0]+")"
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
@@ -166,26 +171,46 @@ def add_order(qrCode, quantity, empUsername):
         print("Couldn't insert the record to the database, an integrity constraint failed!")
 
     # TO DO grab the order id to insert it on each Order-Item relation
-    query = "Select oderId from Orders join Account as acc on e.empId=acc.empId where "
+    query = "select distinct(last_insert_id()) from Item;"
     cursor = mydb.cursor()
     cursor.execute(query)
-    fullname = cursor.fetchone()
+    order_id = cursor.fetchone()
     # Add the items into the order
     for item, itemQuantity in zip(qrCode, quantity):
         try:
-            query = "Insert into Order_Item(OrderId,barCode,quantity) values(\"" +  + "\",\"" + item + "\",\""+quantity+"\")"
+            query = "Insert into Order_Item(OrderId,barCode,quantity) values(" + order_id[0] + ",\"" + item + "\",\""+quantity+"\")"
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
-            print("New Order created Successfully!!")
+            print("Item of QRcode "+qrCode+" was added successfully!!")
+            # Update the quantity of the item
+            query = "Update item set leftAmount=leftAmount-"+quantity+"where barCode="+qrCode
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+            print("Updated " + qrCode + " item's quantity successfully!!")
         except mysql.connector.IntegrityError as error:
             print("Couldn't insert the record to the database, an integrity constraint failed!")
-
-
-
-
-
-
+        # Update the quantity of the item
+        try:
+            query = "Update item set leftAmount=leftAmount-"+quantity+"where barCode="+qrCode
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+            print("Updated " + qrCode + " item's quantity successfully!!")
+        except mysql.connector.IntegrityError as error:
+            print("Couldn't insert the record to the database, an integrity constraint failed!")
+    # After Updating the quantity of each product we update the price of the order
+    try:
+        query = "Update orders set price = SUM(select price from order_Item where orderId=" + order_id[
+            0] + ") where orderId=" + order_id[0]
+        cursor = mydb.cursor()
+        cursor.execute(query)
+        mydb.commit()
+        print("Order number " + order_id[0] + " price was updated successfully!!")
+        return "Order created Successfully!"
+    except mysql.connector.IntegrityError as error:
+        print("Couldn't insert the record to the database, an integrity constraint failed!")
 
 @eel.expose
 def passProps():
