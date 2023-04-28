@@ -139,10 +139,10 @@ def login(username_email, password):
 
 
 @eel.expose
-def addOrder(qrCode, quantity, employeeReference):
+def add_order(qrCode, quantity, empUsername):
     if len(qrCode) != len(quantity):
         return "Please select a quantity for each item"
-    #check if all items are present
+    # check if all items are present
     for item, itemQuantity in zip(qrCode, quantity):
         mycursor = mydb.cursor()
         mycursor.execute("SELECT EXISTS(SELECT qrcode FROM item WHERE qrcode = %s)", (item,))
@@ -157,7 +157,7 @@ def addOrder(qrCode, quantity, employeeReference):
     # Create the order
     currentDate = str(date.today())
     try:
-        query = "Insert into order(date,price,isOnline) values(\"" + currentDate + "\"," + 1 + ",true)"
+        query = "Insert into orders(date,price,isOnline) values(\"" + currentDate + "\"," + 1 + ",true)"
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
@@ -166,7 +166,10 @@ def addOrder(qrCode, quantity, employeeReference):
         print("Couldn't insert the record to the database, an integrity constraint failed!")
 
     # TO DO grab the order id to insert it on each Order-Item relation
-
+    query = "Select oderId from Orders join Account as acc on e.empId=acc.empId where "
+    cursor = mydb.cursor()
+    cursor.execute(query)
+    fullname = cursor.fetchone()
     # Add the items into the order
     for item, itemQuantity in zip(qrCode, quantity):
         try:

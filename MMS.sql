@@ -26,13 +26,12 @@ CREATE TABLE Orders (
   Date DATE NOT NULL,
   Price DECIMAL(10,2),
   isOnline BOOLEAN,
-  EmpId INT NOT NULL,
+  EmpId INT,
   PromoCode varchar(20) unique,
   FOREIGN KEY (EmpId) REFERENCES Employee(EmpId) on delete set null,
   FOREIGN KEY (PromoCode) REFERENCES PromoCode(PromoCode) on delete set null,
   constraint check (Price > 0)
 );
-
 -- Create the Item table
 CREATE TABLE Item (
 Barcode bigint PRIMARY KEY,
@@ -46,11 +45,11 @@ constraint check (Price > 0)
 -- Relation between Item and order
 create Table Item_Order(
 OrderId INT,
-barcode INT,
+barcode bigint,
 quantity INT not null,
 primary key(orderId,barcode),
 foreign key(orderId) references orders(orderId),
-foreign key(barcode) references Item(barcode) on delete set null,
+foreign key(barcode) references Item(barcode),
 constraint check (quantity > 0)
 );
 
@@ -63,7 +62,7 @@ CREATE TABLE Supplier (
 ALTER TABLE Supplier AUTO_INCREMENT=100;
 
 create table Item_Supplier(
-    barcode INT NOT NULL,
+    barcode bigint NOT NULL,
     supplierId INT NOT NULL,
     price decimal(10,2) NOT NULL,
     supplyAmount INT NOT NULL,
