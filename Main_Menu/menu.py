@@ -140,8 +140,8 @@ def login(username_email, password):
 
 @eel.expose
 def add_order(qrCode, quantity, empUsername, promoCode):
-    if len(qrCode) != len(quantity):
-        return "Please select a quantity for each item"
+    if len(qrCode) == 0:
+        return "Please add an item."
     # check if all items are present with requested quantities
     for item, itemQuantity in zip(qrCode, quantity):
         mycursor = mydb.cursor()
@@ -162,7 +162,7 @@ def add_order(qrCode, quantity, empUsername, promoCode):
         cursor = mydb.cursor()
         cursor.execute(query)
         empId = cursor.fetchone()
-        query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\"," + 1 + ",true,"+empId[0]+")"
+        query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\",1,true,"+empId[0]+")"
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
@@ -216,27 +216,63 @@ def add_order(qrCode, quantity, empUsername, promoCode):
 @eel.expose
 def add_delivery_order(qrCode, quantity, empUsername, promoCode, firstname, lastname, phoneNumber, address):
     # use add order to add an order
-    add_order(qrCode, quantity, empUsername, promoCode)
-    try:
-        query = "select distinct(last_insert_id()) from Item;"
-        cursor = mydb.cursor()
-        cursor.execute(query)
-        order_id = cursor.fetchone()
-    except mysql.connector.IntegrityError as error:
-        print("Couldn't insert the record to the database, an integrity constraint failed!")
-        return "Failed to link customer to his order."
-    try:
-        query = "Insert into customer(firstname,lastname,phoneNumber,address,orderId) values(\""+firstname+"\",\""+lastname +\
-                "\",\""+phoneNumber+"\",\""+address+"\","+order_id[0]+")"
-        cursor = mydb.cursor()
-        cursor.execute(query)
-        mydb.commit()
-        print("Customer "+firstname+" "+lastname + "'s order was added Successfully!")
-        return "Customer's order was added Successfully!"
-    except mysql.connector.IntegrityError as error:
-        print("Couldn't insert the record to the database, an integrity constraint failed!")
+    result = add_order(qrCode, quantity, empUsername, promoCode)
+    if result == "Order created Successfully!":
+        try:
+            query = "select distinct(last_insert_id()) from Item;"
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            order_id = cursor.fetchone()
+        except mysql.connector.IntegrityError as error:
+            print("Couldn't insert the record to the database, an integrity constraint failed!")
+            return "Failed to link customer to his order."
+        try:
+            query = "Insert into customer(firstname,lastname,phoneNumber,address,orderId) values(\"" + firstname + "\",\"" + lastname + \
+                    "\",\"" + phoneNumber + "\",\"" + address + "\"," + order_id[0] + ")"
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+            print("Customer " + firstname + " " + lastname + "'s order was added Successfully!")
+            return "Customer's order was added Successfully!"
+        except mysql.connector.IntegrityError as error:
+            print("Couldn't insert the record to the database, an integrity constraint failed!")
+    else:
+        return result
 
 
+def price(barcode):
+    try:
+        query = "select price from Item where barcode="+barcode
+        cursor = mydb.cursor()
+        cursor.execute(query)
+        price = cursor.fetchone()
+        print(price[0])
+        return str(price[0])+""
+    except mysql.connector.IntegrityError as error:
+        print("Couldn't insert the record to the database, an integrity constraint failed!")
+        return "Item not found!"
+
+
+def name(barcode):
+    try:
+        query = "select name from Item where barcode="+barcode
+        cursor = mydb.cursor()
+        cursor.execute(query)
+        name = cursor.fetchone()[0]
+        print(name)
+        return name+""
+    except mysql.connector.IntegrityError as error:
+        print("Couldn't insert the record to the database, an integrity constraint failed!")
+        return "Item not found!"
+@eel.expose
+def getName(barcode):
+    item_name = name(barcode)
+    return item_name
+
+@eel.expose
+def getPrice(barcode):
+    item_price = price(barcode)
+    return item_price
 @eel.expose
 def passProps():
     return prop

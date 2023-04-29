@@ -7,13 +7,77 @@
         <script type="text/javascript" src="/eel.js"></script>
         <script>
         eel.passProps()(receivedData);
+
         function routing(newPage){
-        window.close()
-        eel.routing(newPage)
+            window.close();
+            eel.routing(newPage);
         }
         function receivedData(props){
             props= "Welcome "+props;
             document.getElementById("account").innerHTML=props;
+        }
+        function handleError(text){
+            document.getElementById("message").innerHTML=text;
+            if(text==="Order created Successfully!"){
+                document.getElementById("message").innerHTML="";
+                document.getElementById("barcode").innerHTML="";
+                document.getElementById("quantity").innerHTML="";
+            }
+        }
+
+        function addOrder(qrCode, quantity, empUsername, promoCode){
+            eel.add_order(qrCode, quantity, empUsername, promoCode)(handleError);
+        }
+
+        </script>
+        <script>
+        var itemArray=[];
+        var orderContent="";
+        itemName=[];
+        itemPrice=[];
+        var price=0
+        async function getDataPrice(priceData){
+            await itemPrice.push(priceData);
+        }
+
+        async function getDataName(nameData){
+            await itemName.push(nameData);
+        }
+        async function add(){
+            var barcode=document.getElementById("barcode").value;
+            var quantity=document.getElementById("quantity").value;
+            await eel.getName(barcode)(getDataName);
+            await eel.getPrice(barcode)(getDataPrice);
+
+            if( barcode && quantity){
+                var itemCount=0;
+                itemArray.push({barcode,quantity});
+                console.log(itemArray);
+                orderContent="<b id='account'"+"></b>"
+                setTimeout(()=>{
+                itemArray.map((item,index)=>{
+                    name= itemName[index];
+                    price= itemPrice[index];
+                    console.log(name);
+                    console.log(price);
+                    orderContent=orderContent+"<div class='info' id='"+index+"'><h2>'"+name+"'</h2><p><strong>Price: '"+price+"'$</strong></p><p><strong>Quantity: "+item.quantity+"</strong></p><div class='delete'><img src='https://cdn-icons-png.flaticon.com/128/3405/3405244.png' alt='delete icon' onclick='deleteItem("+itemCount+")'></img></div></div>";
+                    itemCount++;
+                });
+                document.getElementById("items").innerHTML=orderContent;
+                },500);
+            }
+            else{
+                handleError("Please enter both a Barcode and a Quantity");
+            }
+        }
+        function deleteItem(id){
+            itemArray.splice(id,id);
+            orderContent=""
+            itemArray.map(item=>{
+            orderContent=orderContent+"<div class='info' id='"+itemCount+"'><h2>"+item.name+"</h2><p><strong>Price: "+item.price+"$</strong></p><p><strong>Quantity: "+item.quantity+"</strong></p><div class='delete'><img src='https://cdn-icons-png.flaticon.com/128/3405/3405244.png' alt='delete icon' onclick='deleteItem("+itemCount+")'></img></div></div>";
+            itemCount++;
+            });
+        document.getElementById("items").innerHTML=orderContent;
         }
         </script>
 </head>
@@ -29,72 +93,25 @@
         </div>
     </div>
     <div class="home">
-        <div class="items">
-            <b id="account"></b>
-            <div class="info">
-                <h2>Labne</h2>
-                <p>
-                    <strong>Price:</strong>
-                </p>
-                <p>
-                    <strong>Quantity:</strong>
-                </p>
-                <div class="delete">
-                    <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
-                </div>
-            </div>
-            <div class="info">
-                <h2>Jebne</h2>
-                <p>
-                    <strong>Price:</strong>
-                </p>
-                <p>
-                    <strong>Quantity:</strong>
-                </p>
-                <div class="delete">
-                    <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
-                </div>
-            </div>
-            <div class="info">
-                <h2>Jebne</h2>
-                <p>
-                    <strong>Price:</strong>
-                </p>
-                <p>
-                    <strong>Quantity:</strong>
-                </p>
-                <div class="delete">
-                    <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
-                </div>
-            </div>
-            <div class="info">
-                <h2>Jebne</h2>
-                <p>
-                    <strong>Price:</strong>
-                </p>
-                <p>
-                    <strong>Quantity:</strong>
-                </p>
-                <div class="delete">
-                    <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
-                </div>
-            </div>
+        <div class="items" id="items">
+            <b id="account"> Hello</b>
         </div>
 
         <div class="barcode">
             <span>Add a new Item</span>
             <div class="form">
                 <label>Barcode:</label>
-                <input type="number" placeholder="XXXXXXXX" />
+                <input type="number" placeholder="XXXXXXXX" id="barcode"/>
                 <label>Quantity:</label>
-                <input type="number" placeholder="0" />
+                <input type="number" placeholder="0" id="quantity"/>
             </div>
             <div class="submit">
-                <button class="add">Add</button>
+                <button class="add" onclick="add()">Add</button>
                 <button class="finish">Finish</button>
             </div>
-
+            <b id="message" style="color:red"></b>
         </div>
     </div>
+
 </body>
 </html>
