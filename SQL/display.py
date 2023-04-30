@@ -135,7 +135,6 @@ def displayEntity(entity_input, username):
 
             print("Email Sent!")
 
-
     def remove_row(tree):
         # Get the selected row(s)
         selected_rows = tree.selection()
@@ -145,6 +144,20 @@ def displayEntity(entity_input, username):
             # TODO Remove query
             values = tree.item(row, 'values')
             print(values[0])
+            if entity == "Account":
+                query = "SELECT empid FROM Account WHERE username = \"" + values[0] + "\""
+                mycursor.execute(query)
+                result = mycursor.fetchone()
+                empid = result[0] if result else ''
+
+                # Delete the row from the database
+                query = "DELETE FROM Account WHERE username = \"" + values[0] + "\""
+                mycursor.execute(query)
+                query = "DELETE FROM Employee WHERE empid = " + str(empid)
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
 
     # Create a Frame to hold the buttons
     button_frame = customtkinter.CTkFrame(root)
