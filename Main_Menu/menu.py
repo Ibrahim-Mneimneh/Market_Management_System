@@ -16,11 +16,11 @@ config = configparser.ConfigParser()
 config.read(file_path)
 try:
     mydb = mysql.connector.connect(
-        host=config.get('mysql', 'host'),
-        user=config.get('mysql', 'user'),
-        password=config.get('mysql', 'password'),
+        host="localhost",                # config.get('mysql', 'host'),
+        user="root",                               #config.get('mysql', 'user'),
+        password="Ib97mn69ji*",                            #config.get('mysql', 'password'),
         port=3306,
-        database=config.get('mysql', 'database')
+        database="mms"                     #config.get('mysql', 'database')
     )
 except mysql.connector.Error as error:
     print("Database Connection Failed!")
@@ -124,13 +124,10 @@ def login(username_email, password):
 
         # Check if the passwords match
         if hashed_password == stored_password:
-            query = "Select firstname, lastname from Employee as e join Account as acc on e.empId=acc.empId where " \
-                   "username=\""+account[0]+"\" "
-            cursor = mydb.cursor()
-            cursor.execute(query)
-            fullname = cursor.fetchone()
+
             global prop
-            prop = fullname[0]+" "+fullname[1]
+            prop = account[0]
+            print(account[0]+" just logged in!")
             return "Logging In."
         else:
             return "Incorrect Username/Email or Password."
@@ -145,69 +142,73 @@ def add_order(qrCode, quantity, empUsername, promoCode):
     # check if all items are present with requested quantities
     for item, itemQuantity in zip(qrCode, quantity):
         mycursor = mydb.cursor()
-        mycursor.execute("SELECT EXISTS(SELECT qrcode FROM item WHERE barCode = %s)", (item,))
+        mycursor.execute("SELECT EXISTS(SELECT barCode FROM Item WHERE barCode ="+item+");")
         result = mycursor.fetchone()[0]
         if result != 1:
             return "The item '"+item+"' doesn't exist."
         mycursor = mydb.cursor()
-        mycursor.execute("SELECT leftAmount FROM item WHERE barCode = %s)", (item,))
+        query = "SELECT leftAmount FROM Item WHERE barCode = "+item+";"
+        mycursor.execute(query)
         result = mycursor.fetchone()[0]
-        if result < itemQuantity:
-            return "Requested amount of '"+item+"' is not available. Available amount is "+result
+        if result < int(itemQuantity) or int(itemQuantity) == 0:
+            return "Requested amount of '"+item+"' is "+itemQuantity+" not available. Available amount is "+result
     # Create the order, we need to grab the employee's ID first
     currentDate = str(date.today())
     try:
-        query = "Select empId from Employee as e join Account as acc on e.empId=acc.empId where " \
-                "username=\"" + empUsername + "\" "
+        query = "Select e.empId from Employee as e join Account as acc on e.empId=acc.empId where username=\"" + empUsername + "\";"
         cursor = mydb.cursor()
         cursor.execute(query)
         empId = cursor.fetchone()
-        query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\",1,true,"+empId[0]+")"
-        cursor = mydb.cursor()
-        cursor.execute(query)
-        mydb.commit()
+        print("EmpId: "+str(empId[0]))
+        if promoCode == "":
+            query = "Insert into orders(date,price,isOnline,EmpId) values(\"" + currentDate + "\",1,true," + str(empId[0]) + ");"
+            # add promo code
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+        else:
+            query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\",1,true," + str(empId[0]) + ",\"" + promoCode + "\");"
+            # add promo code
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+
         print("New Order created Successfully!!")
     except mysql.connector.IntegrityError as error:
-        print("Couldn't insert the record to the database, an integrity constraint failed!")
+        print("Couldn't place Order! 0")
 
     # TO DO grab the order id to insert it on each Order-Item relation
     query = "select distinct(last_insert_id()) from Item;"
     cursor = mydb.cursor()
     cursor.execute(query)
     order_id = cursor.fetchone()
+    print(str(order_id[0]))
     # Add the items into the order
     for item, itemQuantity in zip(qrCode, quantity):
         try:
-            query = "Insert into Order_Item(OrderId,barCode,quantity) values(" + order_id[0] + "\"," + item + "\",\""+quantity+"\")"
+            query = "Insert into item_Order(OrderId,barCode,quantity) values(" + str(order_id[0]) + "," + item + ","+str(itemQuantity)+");"
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
-            print("Item of QRcode "+qrCode+" was added successfully!!")
-            # Update the quantity of the item
-            query = "Update item set leftAmount=leftAmount-"+quantity+"where barCode="+qrCode
-            cursor = mydb.cursor()
-            cursor.execute(query)
-            mydb.commit()
-            print("Updated " + qrCode + " item's quantity successfully!!")
+            print("Item of QRcode "+item+" was added successfully!!")
         except mysql.connector.IntegrityError as error:
-            print("Couldn't insert the record to the database, an integrity constraint failed!")
+            return "Couldn't place Order!"
         # Update the quantity of the item
         try:
-            query = "Update item set leftAmount=leftAmount-"+quantity+"where barCode="+qrCode
+            query = "Update item set leftAmount=leftAmount-"+str(itemQuantity)+" where barCode="+item
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
-            print("Updated " + qrCode + " item's quantity successfully!!")
+            print("Updated " + item + " item's quantity successfully!!")
         except mysql.connector.IntegrityError as error:
             print("Couldn't insert the record to the database, an integrity constraint failed!")
     # After Updating the quantity of each product we update the price of the order
     try:
-        query = "Update orders set price = SUM(select price from order_Item where orderId=" + order_id[
-            0] + ") where orderId=" + order_id[0]
+        query = "Update orders set price=(select sum(i.Price*io.quantity) from item as i join item_order as io on i.Barcode=io.barcode where orderId="+str(order_id[0])+") where orderId=" + str(order_id[0])+";"
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
-        print("Order number " + order_id[0] + " price was updated successfully!!")
+        print("Order number " + str(order_id[0]) + " price was updated successfully!!")
         return "Order created Successfully!"
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
@@ -246,8 +247,12 @@ def price(barcode):
         cursor = mydb.cursor()
         cursor.execute(query)
         price = cursor.fetchone()
-        print(price[0])
-        return str(price[0])+""
+        if price:
+            print(price[0])
+            return str(price[0]) + ""
+        else:
+            print("Item not found!")
+            return "Item not found!"
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
         return "Item not found!"
@@ -259,20 +264,29 @@ def name(barcode):
         cursor = mydb.cursor()
         cursor.execute(query)
         name = cursor.fetchone()[0]
-        print(name)
-        return name+""
+        if name:
+            print(name)
+            return name + ""
+        else:
+            print("Item not found!")
+            return "Item not found!"
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
         return "Item not found!"
+
+
 @eel.expose
 def getName(barcode):
     item_name = name(barcode)
     return item_name
 
+
 @eel.expose
 def getPrice(barcode):
     item_price = price(barcode)
     return item_price
+
+
 @eel.expose
 def passProps():
     return prop
@@ -289,7 +303,7 @@ def getProps(props):
     prop = props
 
 
-page = "menu.html"
+page = "home.html"
 
 eel.init("Menu")
 eel.start(page, size=(GetSystemMetrics(0), GetSystemMetrics(1)))

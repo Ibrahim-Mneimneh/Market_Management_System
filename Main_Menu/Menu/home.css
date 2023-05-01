@@ -65,6 +65,7 @@ body {
   margin-left: 8%;
   font-family: "Dongle";
   font-weight: 400;
+  gap:20px;
 }
 .barcode > span {
   font-size: 35px;
@@ -79,9 +80,7 @@ body {
 .submit {
   display: flex;
   flex-direction: row;
-  gap: 10px;
-  align-items: center;
-  margin-left: 45%;
+  margin-left:180px;
 }
 
 label {
@@ -96,6 +95,8 @@ input {
   box-sizing: border-box;
 }
 button {
+  width:80px;
+  height:40px;
   border: 0;
   color: #fff;
   padding: 5px 10px 5px 10px;
@@ -118,12 +119,18 @@ button {
 .finish:hover {
   background-color: rgb(255, 50, 50);
 }
-
-.items {
+.item-section{
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 40px;
+  margin-top: 20px;
+  width:100%;
+}
+.items {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  width:100%;
 }
 
 .info {
@@ -176,4 +183,10 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+.message{
+    display:flex;
+    margin-left:50px;
+    font-size:25px;
+    color:red;
 }
