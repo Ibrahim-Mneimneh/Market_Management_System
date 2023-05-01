@@ -1,0 +1,4 @@
+customtkinter
+Eel
+mysql-connector-python
+pywin32
