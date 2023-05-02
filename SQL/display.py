@@ -157,6 +157,7 @@ def displayEntity(entity_input, username):
                 mycursor.execute(query)
                 mydb.commit()
 
+
                 tree.delete(row)
 
     # Create a Frame to hold the buttons

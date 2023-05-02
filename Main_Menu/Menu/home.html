@@ -98,9 +98,9 @@
         }
         function submit(){
             if(barcodes!=[]){
-                // var username= document.getElementById("account").innerHTML;
-                // username=username.split(" ")[1];
-                var username="Ibrahim_Mneimneh";
+                var username= document.getElementById("account").innerHTML;
+                username=username.split(" ")[1];
+
                 promoCode=document.getElementById("promoCode").innerHTML;
 
                 eel.add_order(barcodes,quantities,username,promoCode);
