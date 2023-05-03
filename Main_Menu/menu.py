@@ -309,5 +309,6 @@ def getProps(props):
 
 page = "menu.html"
 
+
 eel.init("Menu")
 eel.start(page, size=(GetSystemMetrics(0), GetSystemMetrics(1)))
