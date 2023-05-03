@@ -8,29 +8,28 @@ from win32api import GetSystemMetrics
 from datetime import date
 
 file_path = "../config.cfg"
-prop = ""
+prop=""
 if not os.path.exists(file_path):
-    subprocess.run(['python', '../SQL/SQLprompt.py'])
+    subprocess.run(['python', '../SQL/getSQLpassword.py'])
 
 config = configparser.ConfigParser()
 config.read(file_path)
 try:
     mydb = mysql.connector.connect(
-        host=config.get('mysql', 'host'),
-        user=config.get('mysql', 'user'),
+        host="localhost",                # config.get('mysql', 'host'),
+        user="root",                               #config.get('mysql', 'user'),
         password=config.get('mysql', 'password'),
         port=3306,
-        database=config.get('mysql', 'database')
+        database="mms"                     #config.get('mysql', 'database')
     )
 except mysql.connector.Error as error:
     print("Database Connection Failed!")
     quit()
     mydb.close()
 
-
 # todo get profit from manager gui (expenses, total salaries) and matplotlib
 # todo manager request items from suppliers
-# todo order function
+
 
 @eel.expose
 def signup(firstname, lastname, email, username, phonenumber, password):
@@ -137,7 +136,7 @@ def login(username_email, password):
 
 
 @eel.expose
-def add_order(qrCode, quantity, empUsername, promoCode):
+def add_order(qrCode, quantity, empUsername, promoCode, isOnline):
     if len(qrCode) == 0:
         return "Please add an item."
     # check if all items are present with requested quantities
@@ -162,14 +161,14 @@ def add_order(qrCode, quantity, empUsername, promoCode):
         empId = cursor.fetchone()
         print("EmpId: " + str(empId[0]))
         if promoCode == "":
-            query = "Insert into orders(date,price,isOnline,EmpId) values(\"" + currentDate + "\",1,true," + str(
+            query = "Insert into orders(date,price,isOnline,EmpId) values(\"" + currentDate + "\",1,"+str(isOnline)+"," + str(
                 empId[0]) + ");"
             # add promo code
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
         else:
-            query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\",1,true," + str(
+            query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\",1,"+str(isOnline)+"," + str(
                 empId[0]) + ",\"" + promoCode + "\");"
             # add promo code
             cursor = mydb.cursor()
@@ -180,7 +179,7 @@ def add_order(qrCode, quantity, empUsername, promoCode):
     except mysql.connector.IntegrityError as error:
         print("Couldn't place Order! 0")
 
-    # TODO grab the order id to insert it on each Order-Item relation
+    # Grab the order id to insert it on each Order-Item relation
     query = "select distinct(last_insert_id()) from Item;"
     cursor = mydb.cursor()
     cursor.execute(query)
@@ -222,7 +221,7 @@ def add_order(qrCode, quantity, empUsername, promoCode):
 @eel.expose
 def add_delivery_order(qrCode, quantity, empUsername, promoCode, firstname, lastname, phoneNumber, address):
     # use add order to add an order
-    result = add_order(qrCode, quantity, empUsername, promoCode)
+    result = add_order(qrCode, quantity, empUsername, promoCode,1)
     if result == "Order created Successfully!":
         try:
             query = "select distinct(last_insert_id()) from Item;"
@@ -234,7 +233,7 @@ def add_delivery_order(qrCode, quantity, empUsername, promoCode, firstname, last
             return "Failed to link customer to his order."
         try:
             query = "Insert into customer(firstname,lastname,phoneNumber,address,orderId) values(\"" + firstname + "\",\"" + lastname + \
-                    "\",\"" + phoneNumber + "\",\"" + address + "\"," + order_id[0] + ")"
+                    "\",\"" + phoneNumber + "\",\"" + address + "\"," + str(order_id[0]) + ")"
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
@@ -243,7 +242,7 @@ def add_delivery_order(qrCode, quantity, empUsername, promoCode, firstname, last
         except mysql.connector.IntegrityError as error:
             print("Couldn't insert the record to the database, an integrity constraint failed!")
     else:
-        return result
+        return "Order failed! Please try again!"
 
 
 def price(barcode):
@@ -256,8 +255,8 @@ def price(barcode):
             print(price[0])
             return str(price[0]) + ""
         else:
-            print("Item not found!")
-            return "Item not found!"
+            print("Price not found!")
+            return "Price not found!"
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
         return "Item not found!"
@@ -268,10 +267,10 @@ def name(barcode):
         query = "select name from Item where barcode=" + barcode
         cursor = mydb.cursor()
         cursor.execute(query)
-        name = cursor.fetchone()[0]
+        name = cursor.fetchone()
         if name:
-            print(name)
-            return name + ""
+            print(name[0])
+            return name[0] + ""
         else:
             print("Item not found!")
             return "Item not found!"

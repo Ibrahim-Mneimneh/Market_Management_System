@@ -14,17 +14,27 @@
         }
         function receivedData(props){
             props= "Welcome "+props;
+            console.log(props);
             document.getElementById("account").innerHTML=props;
         }
         function handleError(text){
-            document.getElementById("message").innerHTML=text;
+
             if(text==="Order created Successfully!"){
-                document.getElementById("message").innerHTML="";
-                document.getElementById("barcode").innerHTML="";
-                document.getElementById("quantity").innerHTML="";
+                document.getElementById("message"),innerHTML="";
+                document.getElementById("items").innerHTML="";
+                document.getElementById("barcode").value="";
+                document.getElementById("quantity").value="";
+                document.getElementById("promoCode").value="";
+                document.getElementById("result").innerHTML="Order added Successfully!";
+                barcodes=[];
+                quantities=[];
+                itemName=[];
+                itemPrice=[];
+                itemCount=0;
             }
             else{
-                document.getElementById("message").innerHTML=props;
+                itemCount=0;
+                document.getElementById("message").innerHTML=text;
             }
         }
 
@@ -47,12 +57,13 @@
             await itemName.push(nameData);
         }
         async function add(){
+            document.getElementById("message"),innerHTML="";
             var barcode=document.getElementById("barcode").value;
             var quantity=document.getElementById("quantity").value;
-            await eel.getName(barcode)(getDataName);
-            await eel.getPrice(barcode)(getDataPrice);
 
             if( barcode && quantity){
+                await eel.getName(barcode)(getDataName);
+                await eel.getPrice(barcode)(getDataPrice);
                 barcodes.push(barcode);
                 quantities.push(quantity);
                 console.log(quantity+" of "+barcode);
@@ -61,14 +72,28 @@
                 barcodes.map((barcode,index)=>{
                     name= itemName[index];
                     price= itemPrice[index];
-                    console.log(name+ " : "+price+" was added!");
-                    orderContent=orderContent+"<div class='info' id='"+index+"'><h2>'"+name+"'</h2><p><strong>Price: '"+price+"'$</strong></p><p><strong>Quantity: "+quantities[index]+"</strong></p><div class='delete'><img src='https://cdn-icons-png.flaticon.com/128/3405/3405244.png' alt='delete icon' onclick='deleteItem("+index+")'></img></div></div>";
+                    if(name!=="Item not found!"){
+                        console.log(name+ " : "+price+" was added!");
+                        orderContent=orderContent+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Price (per unit): "+price+" $</strong></p><p><strong>Quantity: "+quantities[index]+"</strong></p><div class='delete'><img src='https://cdn-icons-png.flaticon.com/128/3405/3405244.png' alt='delete icon' onclick='deleteItem("+index+")'></img></div></div>";
+                    }
+                    else{
+                        document.getElementById("message").innerHTML="Item "+barcode+" not found!";
+                        barcodes.pop();
+                        quantities.pop();
+                        itemName.pop();
+                        itemPrice.pop();
+                    }
                 });
                 document.getElementById("items").innerHTML=orderContent;
                 },500);
             }
             else{
-                handleError("Please enter both a Barcode and a Quantity");
+                if(!barcode){
+                    handleError("Please enter a Barcode!");
+                }
+                else{
+                    handleError("Please enter a Quantity!");
+                }
             }
         }
         function deleteItem(id){
@@ -91,22 +116,24 @@
             barcodes.map((barcode,index)=>{
                  name= itemName[index];
                  price= itemPrice[index];
-                 newOrderContent=newOrderContent+"<div class='info' id='"+index+"'><h2>'"+name+"'</h2><p><strong>Price: '"+price+"'$</strong></p><p><strong>Quantity: "+quantities[index]+"</strong></p><div class='delete'><img src='https://cdn-icons-png.flaticon.com/128/3405/3405244.png' alt='delete icon' onclick='deleteItem("+index+")'></img></div></div>";
+                 newOrderContent=newOrderContent+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Price: (per unit)"+price+" $</strong></p><p><strong>Quantity: "+quantities[index]+"</strong></p><div class='delete'><img src='https://cdn-icons-png.flaticon.com/128/3405/3405244.png' alt='delete icon' onclick='deleteItem("+index+")'></img></div></div>";
             });
 
         document.getElementById("items").innerHTML=newOrderContent;
         }
         function submit(){
+            document.getElementById("result").innerHTML="";
+            document.getElementById("message").innerHTML="";
             if(barcodes!=[]){
                 var username= document.getElementById("account").innerHTML;
                 username=username.split(" ")[1];
 
                 promoCode=document.getElementById("promoCode").innerHTML;
 
-                eel.add_order(barcodes,quantities,username,promoCode);
+                eel.add_order(barcodes,quantities,username,promoCode,true)(handleError);
             }
             else{
-                document.getElementById("message").innerHTML="Please add an item first!";
+                document.getElementById("message").innerHTML="Please add an Item!";
             }
         }
         </script>
@@ -146,8 +173,10 @@
                 <div class="submit">
                 <button class="finish" onclick="submit()">Finish</button>
                 </div>
+                <b id="message" class="message"></b>
+                <b id="result" class="result"></b>
             </div>
-            <b id="message" class="message"></b>
+
 
         </div>
     </div>

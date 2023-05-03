@@ -7,13 +7,139 @@
         <script type="text/javascript" src="/eel.js"></script>
         <script>
         eel.passProps()(receivedData);
+
         function routing(newPage){
-        window.close()
-        eel.routing(newPage)
+            window.close();
+            eel.routing(newPage);
         }
         function receivedData(props){
             props= "Welcome "+props;
+            console.log(props);
             document.getElementById("account").innerHTML=props;
+        }
+        function handleError(text){
+
+            if(text==="Order created Successfully!"){
+                document.getElementById("message"),innerHTML="";
+                document.getElementById("items").innerHTML="";
+                document.getElementById("barcode").value="";
+                document.getElementById("quantity").value="";
+                document.getElementById("promoCode").value="";
+                document.getElementById("result").innerHTML="Order added Successfully!";
+                barcodes=[];
+                quantities=[];
+                itemName=[];
+                itemPrice=[];
+                itemCount=0;
+            }
+            else{
+                itemCount=0;
+                document.getElementById("message").innerHTML=text;
+            }
+        }
+
+        function addOrder(qrCode, quantity, empUsername, promoCode){
+            eel.add_order(qrCode, quantity, empUsername, promoCode)(handleError);
+        }
+
+        </script>
+        <script>
+        var barcodes=[];
+        var quantities=[];
+        var itemName=[];
+        var itemPrice=[];
+        var itemCount=0;
+        async function getDataPrice(priceData){
+            await itemPrice.push(priceData);
+        }
+
+        async function getDataName(nameData){
+            await itemName.push(nameData);
+        }
+        async function add(){
+            document.getElementById("message"),innerHTML="";
+            var barcode=document.getElementById("barcode").value;
+            var quantity=document.getElementById("quantity").value;
+
+            if( barcode && quantity){
+                await eel.getName(barcode)(getDataName);
+                await eel.getPrice(barcode)(getDataPrice);
+                barcodes.push(barcode);
+                quantities.push(quantity);
+                console.log(quantity+" of "+barcode);
+                var orderContent=""
+                setTimeout(()=>{
+                barcodes.map((barcode,index)=>{
+                    name= itemName[index];
+                    price= itemPrice[index];
+                    if(name!=="Item not found!"){
+                        console.log(name+ " : "+price+" was added!");
+                        orderContent=orderContent+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Price (per unit): "+price+" $</strong></p><p><strong>Quantity: "+quantities[index]+"</strong></p><div class='delete'><img src='https://cdn-icons-png.flaticon.com/128/3405/3405244.png' alt='delete icon' onclick='deleteItem("+index+")'></img></div></div>";
+                    }
+                    else{
+                        document.getElementById("message").innerHTML="Item "+barcode+" not found!";
+                        barcodes.pop();
+                        quantities.pop();
+                        itemName.pop();
+                        itemPrice.pop();
+                    }
+                });
+                document.getElementById("items").innerHTML=orderContent;
+                },500);
+            }
+            else{
+                if(!barcode){
+                    handleError("Please enter a Barcode!");
+                }
+                else{
+                    handleError("Please enter a Quantity!");
+                }
+            }
+        }
+        function deleteItem(id){
+            console.log(id);
+            if(id==0){
+                barcodes.shift();
+                quantities.shift();
+                itemName.shift();
+                itemPrice.shift();
+            }
+            else{
+                barcodes.splice(id,id);
+                quantities.splice(id,id);
+                itemName.splice(id,id);
+                itemPrice.splice(id,id);
+            }
+
+            newOrderContent="";
+
+            barcodes.map((barcode,index)=>{
+                 name= itemName[index];
+                 price= itemPrice[index];
+                 newOrderContent=newOrderContent+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Price: (per unit)"+price+" $</strong></p><p><strong>Quantity: "+quantities[index]+"</strong></p><div class='delete'><img src='https://cdn-icons-png.flaticon.com/128/3405/3405244.png' alt='delete icon' onclick='deleteItem("+index+")'></img></div></div>";
+            });
+
+        document.getElementById("items").innerHTML=newOrderContent;
+        }
+        function submit(){
+            document.getElementById("result").innerHTML="";
+            document.getElementById("message").innerHTML="";
+            var firstname=document.getElementById("firstname").value;
+            var lastname=document.getElementById("lastname").value;
+            var phoneNumber=document.getElementById("phoneNumber").value;
+            var address=document.getElementById("address").value;
+
+            if(barcodes!=[] && firstname && lastname && phoneNumber && address){
+                var username= document.getElementById("account").innerHTML;
+                username=username.split(" ")[1];
+
+                promoCode=document.getElementById("promoCode").innerHTML;
+
+                eel.add_delivery_order(barcodes,quantities,username,promoCode,firstname,lastname,phoneNumber,address)(handleError);
+            }
+            else{
+                document.getElementById("message").innerHTML="Please add an Item!";
+            }
         }
         </script>
 </head>
@@ -29,68 +155,21 @@
         </div>
     </div>
     <div class="home">
-        <div class="items">
+        <div class="item-section">
             <b id="account"></b>
-            <div class="info">
-                <h2>Labne</h2>
-                <p>
-                    <strong>Price:</strong>
-                </p>
-                <p>
-                    <strong>Quantity:</strong>
-                </p>
-                <div class="delete">
-                    <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
-                </div>
-            </div>
-            <div class="info">
-                <h2>Jebne</h2>
-                <p>
-                    <strong>Price:</strong>
-                </p>
-                <p>
-                    <strong>Quantity:</strong>
-                </p>
-                <div class="delete">
-                    <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
-                </div>
-            </div>
-            <div class="info">
-                <h2>Jebne</h2>
-                <p>
-                    <strong>Price:</strong>
-                </p>
-                <p>
-                    <strong>Quantity:</strong>
-                </p>
-                <div class="delete">
-                    <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
-                </div>
-            </div>
-            <div class="info">
-                <h2>Jebne</h2>
-                <p>
-                    <strong>Price:</strong>
-                </p>
-                <p>
-                    <strong>Quantity:</strong>
-                </p>
-                <div class="delete">
-                    <img src="https://cdn-icons-png.flaticon.com/128/3405/3405244.png" alt="delete icon"></img>
-                </div>
-            </div>
+            <div class="items" id="items"></div>
         </div>
 
         <div class="barcode">
             <span>Add a new Item</span>
             <div class="form">
                 <label>Barcode:</label>
-                <input type="number" placeholder="XXXXXXXX" />
+                <input type="number" placeholder="XXXXXXXX" id="barcode"/>
                 <label>Quantity:</label>
-                <input type="number" placeholder="0" />
+                <input type="number" placeholder="0" id="quantity"/>
             </div>
             <div class="submit">
-                <button class="add">Add</button>
+                <button class="add" onclick="add()">Add</button>
             </div>
             <span>Customer's Info</span>
             <div class="form">
@@ -100,13 +179,20 @@
                 <input type="text" placeholder="Brown" id="lastname"/>
 
                 <label>Phonenumber:</label>
-                <input type="number" placeholder="03647473" />
+                <input type="number" placeholder="03647473" id="phoneNumber"/>
                 <label>Address:</label>
-                <input type="text" placeholder="Beirut-Mazraa-Jana bldg-7th floor" />
+                <input type="text" placeholder="Beirut-Mazraa-Jana bldg-7th floor" id="address"/>
             </div>
-            <div class="submit">
-                <button class="finish">Finish</button>
+            <div class="form">
+                <label>PromoCode: (Optional)</label>
+                <input type="text" placeholder="XXXXX" id="promoCode"/>
+                <div class="submit">
+                <button class="finish" onclick="submit()">Finish</button>
+                </div>
+                <b id="message" class="message"></b>
+                <b id="result" class="result"></b>
             </div>
+
         </div>
     </div>
 </body>
