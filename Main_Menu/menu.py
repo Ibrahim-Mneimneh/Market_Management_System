@@ -8,24 +8,25 @@ from win32api import GetSystemMetrics
 from datetime import date
 
 file_path = "../config.cfg"
-prop=""
+prop = ""
 if not os.path.exists(file_path):
-    subprocess.run(['python', '../SQL/getSQLpassword.py'])
+    subprocess.run(['python', '../SQL/SQLprompt.py'])
 
 config = configparser.ConfigParser()
 config.read(file_path)
 try:
     mydb = mysql.connector.connect(
-        host="localhost",                # config.get('mysql', 'host'),
-        user="root",                               #config.get('mysql', 'user'),
-        password="Ib97mn69ji*",                            #config.get('mysql', 'password'),
+        host=config.get('mysql', 'host'),
+        user=config.get('mysql', 'user'),
+        password=config.get('mysql', 'password'),
         port=3306,
-        database="mms"                     #config.get('mysql', 'database')
+        database=config.get('mysql', 'database')
     )
 except mysql.connector.Error as error:
     print("Database Connection Failed!")
     quit()
     mydb.close()
+
 
 # todo get profit from manager gui (expenses, total salaries) and matplotlib
 # todo manager request items from suppliers
@@ -82,7 +83,7 @@ def signup(firstname, lastname, email, username, phonenumber, password):
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
-        print("Employee "+firstname+" "+lastname+" was added.")
+        print("Employee " + firstname + " " + lastname + " was added.")
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
         return "PhoneNumber is already in use"
@@ -94,7 +95,7 @@ def signup(firstname, lastname, email, username, phonenumber, password):
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
-        print(username+" Account was created Successfully!")
+        print(username + " Account was created Successfully!")
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
         return "Username or email may be already in use."
@@ -127,7 +128,7 @@ def login(username_email, password):
 
             global prop
             prop = account[0]
-            print(account[0]+" just logged in!")
+            print(account[0] + " just logged in!")
             return "Logging In."
         else:
             return "Incorrect Username/Email or Password."
@@ -142,16 +143,16 @@ def add_order(qrCode, quantity, empUsername, promoCode):
     # check if all items are present with requested quantities
     for item, itemQuantity in zip(qrCode, quantity):
         mycursor = mydb.cursor()
-        mycursor.execute("SELECT EXISTS(SELECT barCode FROM Item WHERE barCode ="+item+");")
+        mycursor.execute("SELECT EXISTS(SELECT barCode FROM Item WHERE barCode =" + item + ");")
         result = mycursor.fetchone()[0]
         if result != 1:
-            return "The item '"+item+"' doesn't exist."
+            return "The item '" + item + "' doesn't exist."
         mycursor = mydb.cursor()
-        query = "SELECT leftAmount FROM Item WHERE barCode = "+item+";"
+        query = "SELECT leftAmount FROM Item WHERE barCode = " + item + ";"
         mycursor.execute(query)
         result = mycursor.fetchone()[0]
         if result < int(itemQuantity) or int(itemQuantity) == 0:
-            return "Requested amount of '"+item+"' is "+itemQuantity+" not available. Available amount is "+result
+            return "Requested amount of '" + item + "' is " + itemQuantity + " not available. Available amount is " + result
     # Create the order, we need to grab the employee's ID first
     currentDate = str(date.today())
     try:
@@ -159,15 +160,17 @@ def add_order(qrCode, quantity, empUsername, promoCode):
         cursor = mydb.cursor()
         cursor.execute(query)
         empId = cursor.fetchone()
-        print("EmpId: "+str(empId[0]))
+        print("EmpId: " + str(empId[0]))
         if promoCode == "":
-            query = "Insert into orders(date,price,isOnline,EmpId) values(\"" + currentDate + "\",1,true," + str(empId[0]) + ");"
+            query = "Insert into orders(date,price,isOnline,EmpId) values(\"" + currentDate + "\",1,true," + str(
+                empId[0]) + ");"
             # add promo code
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
         else:
-            query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\",1,true," + str(empId[0]) + ",\"" + promoCode + "\");"
+            query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\",1,true," + str(
+                empId[0]) + ",\"" + promoCode + "\");"
             # add promo code
             cursor = mydb.cursor()
             cursor.execute(query)
@@ -177,7 +180,7 @@ def add_order(qrCode, quantity, empUsername, promoCode):
     except mysql.connector.IntegrityError as error:
         print("Couldn't place Order! 0")
 
-    # TO DO grab the order id to insert it on each Order-Item relation
+    # TODO grab the order id to insert it on each Order-Item relation
     query = "select distinct(last_insert_id()) from Item;"
     cursor = mydb.cursor()
     cursor.execute(query)
@@ -186,16 +189,17 @@ def add_order(qrCode, quantity, empUsername, promoCode):
     # Add the items into the order
     for item, itemQuantity in zip(qrCode, quantity):
         try:
-            query = "Insert into item_Order(OrderId,barCode,quantity) values(" + str(order_id[0]) + "," + item + ","+str(itemQuantity)+");"
+            query = "Insert into item_Order(OrderId,barCode,quantity) values(" + str(
+                order_id[0]) + "," + item + "," + str(itemQuantity) + ");"
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
-            print("Item of QRcode "+item+" was added successfully!!")
+            print("Item of QRcode " + item + " was added successfully!!")
         except mysql.connector.IntegrityError as error:
             return "Couldn't place Order!"
         # Update the quantity of the item
         try:
-            query = "Update item set leftAmount=leftAmount-"+str(itemQuantity)+" where barCode="+item
+            query = "Update item set leftAmount=leftAmount-" + str(itemQuantity) + " where barCode=" + item
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
@@ -204,7 +208,8 @@ def add_order(qrCode, quantity, empUsername, promoCode):
             print("Couldn't insert the record to the database, an integrity constraint failed!")
     # After Updating the quantity of each product we update the price of the order
     try:
-        query = "Update orders set price=(select sum(i.Price*io.quantity) from item as i join item_order as io on i.Barcode=io.barcode where orderId="+str(order_id[0])+") where orderId=" + str(order_id[0])+";"
+        query = "Update orders set price=(select sum(i.Price*io.quantity) from item as i join item_order as io on i.Barcode=io.barcode where orderId=" + str(
+            order_id[0]) + ") where orderId=" + str(order_id[0]) + ";"
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
@@ -243,7 +248,7 @@ def add_delivery_order(qrCode, quantity, empUsername, promoCode, firstname, last
 
 def price(barcode):
     try:
-        query = "select price from Item where barcode="+barcode
+        query = "select price from Item where barcode=" + barcode
         cursor = mydb.cursor()
         cursor.execute(query)
         price = cursor.fetchone()
@@ -260,7 +265,7 @@ def price(barcode):
 
 def name(barcode):
     try:
-        query = "select name from Item where barcode="+barcode
+        query = "select name from Item where barcode=" + barcode
         cursor = mydb.cursor()
         cursor.execute(query)
         name = cursor.fetchone()[0]
@@ -303,7 +308,7 @@ def getProps(props):
     prop = props
 
 
-page = "home.html"
+page = "menu.html"
 
 eel.init("Menu")
 eel.start(page, size=(GetSystemMetrics(0), GetSystemMetrics(1)))
