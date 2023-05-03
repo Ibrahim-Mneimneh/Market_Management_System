@@ -144,6 +144,7 @@ def displayEntity(entity_input, username):
             # TODO Remove query
             values = tree.item(row, 'values')
             print(values[0])
+            print(values[1])
             if entity == "Account":
                 query = "SELECT empid FROM Account WHERE username = \"" + values[0] + "\""
                 mycursor.execute(query)
@@ -157,6 +158,41 @@ def displayEntity(entity_input, username):
                 mycursor.execute(query)
                 mydb.commit()
 
+                tree.delete(row)
+
+            if entity == "Employee":
+                query = "SELECT username FROM Account WHERE empId = \"" + values[0] + "\""
+                mycursor.execute(query)
+                result = mycursor.fetchone()
+                username = result[0] if result else ''
+
+                # Delete the row from the database
+                query = "DELETE FROM Account WHERE username = \"" + str(username) + "\""
+                mycursor.execute(query)
+                query = "DELETE FROM Employee WHERE empid = " + values[0]
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
+            if entity == "Supplier":
+                query = "DELETE FROM Supplier WHERE SupplierId = " + values[0]
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
+            if entity == "Item_Supplier":
+                query = "DELETE FROM Item_Supplier WHERE barcode = " + values[0] + " and supplierId = " + values[1]
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
+            if entity == "Item":
+                query = "DELETE FROM Item WHERE Barcode = " + values[0]
+                mycursor.execute(query)
+                mydb.commit()
 
                 tree.delete(row)
 
@@ -226,4 +262,4 @@ def displayEntity(entity_input, username):
     mydb.close()
 
 
-displayEntity("Employee", 'zouheirn')
+displayEntity("Account", 'zouheirn')
