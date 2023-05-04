@@ -16,11 +16,11 @@ config = configparser.ConfigParser()
 config.read(file_path)
 try:
     mydb = mysql.connector.connect(
-        host=config.get('mysql', 'host'),
-        user=config.get('mysql', 'user'),
-        password=config.get('mysql', 'password'),
+        host="localhost",
+        user="root",
+        password="password",
         port=3306,
-        database=config.get('mysql', 'database')
+        database="mms"
     )
 except mysql.connector.Error as error:
     print("Database Connection Failed!")
@@ -128,6 +128,11 @@ def login(username_email, password):
             global prop
             prop = account[0]
             print(account[0] + " just logged in!")
+            #check if the employee is an admin
+            is_manager=account[3]
+            if is_manager:
+                print("Manager "+account[0] + " just logged in!")
+                return "Logging Manager In."
             return "Logging In."
         else:
             return "Incorrect Username/Email or Password."
@@ -221,7 +226,7 @@ def add_order(qrCode, quantity, empUsername, promoCode, isOnline):
 @eel.expose
 def add_delivery_order(qrCode, quantity, empUsername, promoCode, firstname, lastname, phoneNumber, address):
     # use add order to add an order
-    result = add_order(qrCode, quantity, empUsername, promoCode,1)
+    result = add_order(qrCode, quantity, empUsername, promoCode,True)
     if result == "Order created Successfully!":
         try:
             query = "select distinct(last_insert_id()) from Item;"
@@ -308,7 +313,6 @@ def getProps(props):
 
 
 page = "menu.html"
-
 
 eel.init("Menu")
 eel.start(page, size=(GetSystemMetrics(0), GetSystemMetrics(1)))

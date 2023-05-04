@@ -1,0 +1,57 @@
+@import url("https://fonts.googleapis.com/css2?family=Dongle:wght@300;400&family=Inter:wght@400;600;700&display=swap");
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  position: fixed;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background-color: black;
+  font-family: "Dongle";
+  color: white;
+  width: 100%;
+  height: 7vh;
+  font-weight: 400;
+  font-size: 40px;
+  gap: 10px;
+}
+.logo {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+.logo > img {
+  width: 30px;
+  height: 30px;
+  margin: 0px 8px 5px 10px;
+}
+.options {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 40px;
+  margin-right: 60px;
+}
+.options > span:hover {
+  cursor: pointer;
+  color: #1aac83;
+}
+.home {
+  margin-top: 7vh;
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  background-size: cover;
+  color: black;
+  font-family: "Dongle", sans-serif;
+  font-weight: 400;
+  background-color: #f1f1f1;
+  width: 100%;
+  min-height: 93vh;
+}

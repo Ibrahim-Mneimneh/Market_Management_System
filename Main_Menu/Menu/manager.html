@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Market Management System (Home In Store Order)</title>
+        <link href="home.css" rel="stylesheet">
+        <script type="text/javascript" src="/eel.js"></script>
+        <script>
+        eel.passProps()(receivedData);
+
+        function routing(newPage){
+            window.close();
+            eel.routing(newPage);
+        }
+        function receivedData(props){
+            props= "Welcome "+props;
+            console.log(props);
+            document.getElementById("account").innerHTML=props;
+        }
+        function handleError(text){
+
+            if(text==="Order created Successfully!"){
+                document.getElementById("message"),innerHTML="";
+                document.getElementById("items").innerHTML="";
+                document.getElementById("barcode").value="";
+                document.getElementById("quantity").value="";
+                document.getElementById("promoCode").value="";
+                document.getElementById("result").innerHTML="Order added Successfully!";
+                barcodes=[];
+                quantities=[];
+                itemName=[];
+                itemPrice=[];
+                itemCount=0;
+            }
+            else{
+                itemCount=0;
+                document.getElementById("message").innerHTML=text;
+            }
+        }
+
+        function addOrder(qrCode, quantity, empUsername, promoCode){
+            eel.add_order(qrCode, quantity, empUsername, promoCode)(handleError);
+        }
+
+        </script>
+
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="./grocery-store .png" alt="image">
+            <span>Market Management System</span>
+        </div>
+        <div class="options">
+            <span style="color: #1aac83;">Staff</span>
+            <span onclick="routing('delivery.html')">Stocks</span>
+        </div>
+    </div>
+    <div class="home">
+       <h1>Manager Page</h1>
+    </div>
+
+</body>
+</html>

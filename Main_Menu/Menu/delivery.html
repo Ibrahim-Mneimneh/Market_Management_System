@@ -88,11 +88,17 @@
                 },500);
             }
             else{
-                if(!barcode){
-                    handleError("Please enter a Barcode!");
+                if(!barcode && !quantity){
+                    handleError("Please enter an Item!");
                 }
                 else{
-                    handleError("Please enter a Quantity!");
+                    if(!barcode){
+                        handleError("Please enter a barcode!");
+                    }
+                    else{
+                        handleError("Please enter a Quantity!");
+
+                    }
                 }
             }
         }
