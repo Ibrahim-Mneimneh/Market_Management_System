@@ -10,17 +10,17 @@ from datetime import date
 file_path = "../config.cfg"
 prop=""
 if not os.path.exists(file_path):
-    subprocess.run(['python', '../SQL/getSQLpassword.py'])
+    subprocess.run(['python', '../SQL/SQLprompt.py'])
 
 config = configparser.ConfigParser()
 config.read(file_path)
 try:
     mydb = mysql.connector.connect(
-        host="localhost",                # config.get('mysql', 'host'),
-        user="root",                               #config.get('mysql', 'user'),
+        host=config.get('mysql', 'host'),
+        user=config.get('mysql', 'user'),
         password=config.get('mysql', 'password'),
         port=3306,
-        database="mms"                     #config.get('mysql', 'database')
+        database=config.get('mysql', 'database')
     )
 except mysql.connector.Error as error:
     print("Database Connection Failed!")
@@ -151,7 +151,7 @@ def add_order(qrCode, quantity, empUsername, promoCode, isOnline):
         mycursor.execute(query)
         result = mycursor.fetchone()[0]
         if result < int(itemQuantity) or int(itemQuantity) == 0:
-            return "Requested amount of '" + item + "' is " + itemQuantity + " not available. Available amount is " + result
+            return "Requested amount of '" + item + "' is " + str(itemQuantity) + " not available. Available amount is " + result
     # Create the order, we need to grab the employee's ID first
     currentDate = str(date.today())
     try:
