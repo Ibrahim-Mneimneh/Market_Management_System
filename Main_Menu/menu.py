@@ -27,9 +27,6 @@ except mysql.connector.Error as error:
     quit()
     mydb.close()
 
-# todo get profit from manager gui (expenses, total salaries) and matplotlib
-# todo manager request items from suppliers
-
 
 @eel.expose
 def signup(firstname, lastname, email, username, phonenumber, password):
@@ -283,6 +280,24 @@ def name(barcode):
         print("Couldn't insert the record to the database, an integrity constraint failed!")
         return "Item not found!"
 
+# TODO a function "getEmpUnder" that takes a manager id and returns an array of empIds
+# TODO this function is used inside 2 more functions getEmpOrderNum that takes the manger id calls the  "getEmpUnder"
+#  -to get the empIds and get the number of orders for each employee and add the count to a new array with each
+#  to return an array of orderCounts and a second function "getEmpNames" that uses "getEmpUnder" to get each employee's full name (first and last
+#  concatenated with a space) and return an array with full names (all the 3 arrays you can use group by in "getEmpUnder" to group by
+#  firstname so that all the data would be grouped in the same way).
+
+#TODO a function "getStock" that takes each and returns barcodes of each item where amountLeft not equal to 0
+# Same from before there are 2 more functions "getStockAmount" and "getStockName" that each call the getStock and use its
+# array to return an array of amounts and names respectively
+
+#TODO a function promote that takes an empId and promoterId  and updates the isMan variable after checking it in case the isMan wasn't already 1
+# in case it wasn't we will take each employee under the promoter and set their  managerId to the empId so that the promoted employee is now their boss
+# the manager promoting will have to be the one managing the the promoted employee after so.
+
+#TODO :) have fun i guess
+
+
 
 @eel.expose
 def getName(barcode):
@@ -312,7 +327,7 @@ def getProps(props):
     prop = props
 
 
-page = "menu.html"
+page = "manager.html"
 
 eel.init("Menu")
 eel.start(page, size=(GetSystemMetrics(0), GetSystemMetrics(1)))
