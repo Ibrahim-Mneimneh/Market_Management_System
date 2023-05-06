@@ -1,5 +1,6 @@
 -- Create Schema
 create schema MMS;
+USE MMS;
 
 -- Create the Employee table
 CREATE TABLE Employee (
