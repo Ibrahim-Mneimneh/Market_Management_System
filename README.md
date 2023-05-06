@@ -9,7 +9,7 @@ This project includes multiple python scripts for a market management system. Th
 
 ## Installation
 - Clone the repository.
-- Install the required packages using ```pip install -r requirements.txt.```
+- Install the required packages using ```pip install -r requirements.txt```.
 - Create a MySQL database and configure the credentials in ```config.cfg``` (See below).
 - Run the python script using main.py.
 
