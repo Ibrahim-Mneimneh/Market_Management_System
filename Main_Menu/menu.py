@@ -18,7 +18,7 @@ try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="password",
+        password="Ib97mn69ji*",
         port=3306,
         database="mms"
     )
@@ -280,13 +280,17 @@ def name(barcode):
         print("Couldn't insert the record to the database, an integrity constraint failed!")
         return "Item not found!"
 
-# TODO a function "getEmpUnder" that takes a manager id and returns an array of empIds
-def getEmpUnder(manId):
-    mycursor = mydb.cursor()
-
+#takes a manager's username and returns an array of empIds
+def getEmpUnder(username):
+    try:
+        mycursor = mydb.cursor()
+        mycursor.execute("SELECT EmpId FROM account WHERE username = \""+str(username)+"\"")
+        manId = mycursor.fetchone()[0]
     # Check if manId is a manager
-    mycursor.execute("SELECT EmpId FROM Employee WHERE EmpId = %s AND managerId IS NULL", (manId,))
-    result = mycursor.fetchone()
+        mycursor.execute("SELECT EmpId FROM Employee WHERE EmpId =\""+str(manId)+"\";")
+        result = mycursor.fetchone()
+    except:
+        return "manId is not a manger."
     if result is None:
         return "manId is not a manager."
 
@@ -294,65 +298,75 @@ def getEmpUnder(manId):
     mycursor.execute("SELECT EmpId FROM Employee WHERE managerId = %s", (manId,))
     result = mycursor.fetchall()
     empIds = [row[0] for row in result]
-
+    print(empIds)
     return empIds
 
 # TODO this function is used inside 2 more functions getEmpOrderNum that takes the manger id calls the  "getEmpUnder"
-#  -to get the empIds and get the number of orders for each employee and add the count to a new array with each
+#  to get the empIds and get the number of orders for each employee and add the count to a new array with each
 #  to return an array of orderCounts and a second function "getEmpNames" that uses "getEmpUnder" to get each employee's full name (first and last
 #  concatenated with a space) and return an array with full names (all the 3 arrays you can use group by in "getEmpUnder" to group by
 #  firstname so that all the data would be grouped in the same way).
 
-def getEmpOrderNum(manId):
-    empIds = getEmpUnder(manId)
+@eel.expose
+def getEmpOrderNum(username):
+    empIds = getEmpUnder(username)
     if empIds == "manId is not a manager.":
-        print(empIds)
-        return False
-
+        return "manId is not a manager."
+    empOrderNum=[]
     try:
         cursor = mydb.cursor()
-        query = "SELECT EmpId, COUNT(*) FROM orders WHERE EmpId IN ({}) GROUP BY EmpId".format(",".join(["%s"]*len(empIds)))
-        cursor.execute(query, empIds)
-    except:
-        return False
+        for empId in empIds:
+            query = "SELECT count(*) FROM orders WHERE EmpId="+str(empId)+";"
+            cursor.execute(query)
+            empOrderNum.append(cursor.fetchone()[0])
 
-    # create an empty dictionary to store the results
-    result_dict = {}
-
-    # fetch the results and store them in the dictionary
-    for row in cursor:
-        key = row[0]
-        value = row[1]
-        result_dict[key] = value
-
-    print(result_dict)
-    if result_dict:
-        return result_dict
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+    if empOrderNum:
+        return empOrderNum
     else:
         return False
 
-def getEmpNames(manId):
-    empIds = getEmpUnder(manId)
+@eel.expose
+def getEmpNames(username):
+
+    empIds = getEmpUnder(username)
     if empIds == "manId is not a manager.":
-        print(empIds)
-        return False
-
-    cursor = mydb.cursor()
-
-    fullNames = []
-
-    for empId in empIds:
-        cursor.execute(f"SELECT Firstname, Lastname FROM Employee WHERE EmpId={empId}")
-        result = cursor.fetchone()
-        if result is not None:
-            fullName = f"{result[0]} {result[1]}"
-            fullNames.append(fullName)
-
-    if fullNames:
-        return fullNames
+        return "manId is not a manager."
+    fullnames = []
+    try:
+        cursor = mydb.cursor()
+        for empId in empIds:
+            cursor.execute("SELECT Firstname, Lastname FROM Employee WHERE EmpId="+str(empId)+";")
+            result=cursor.fetchone()
+            fullnames.append(result[0]+" "+result[1])
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+    if fullnames:
+        return fullnames
     else:
         return False
 
+
+@eel.expose
+def getEmpSalaries(username):
+
+    empIds = getEmpUnder(username)
+    if empIds == "manId is not a manager.":
+        return "manId is not a manager."
+    salaries = []
+    try:
+        cursor = mydb.cursor()
+        for empId in empIds:
+            cursor.execute("SELECT salary FROM Employee WHERE EmpId="+str(empId)+";")
+            result=cursor.fetchone()
+            salaries.append(int(result[0]))
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+    if salaries:
+        return salaries
+    else:
+        return False
 #TODO a function "getStock" that takes each and returns barcodes of each item where amountLeft not equal to 0
 # Same from before there are 2 more functions "getStockAmount" and "getStockName" that each call the getStock and use its
 # array to return an array of amounts and names respectively

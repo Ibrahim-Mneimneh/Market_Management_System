@@ -43,15 +43,52 @@ body {
   cursor: pointer;
   color: #1aac83;
 }
-.home {
-  margin-top: 7vh;
-  display: grid;
-  grid-template-columns: 3fr 1fr;
-  background-size: cover;
-  color: black;
+.employee-section{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   font-family: "Dongle", sans-serif;
   font-weight: 400;
   background-color: #f1f1f1;
-  width: 100%;
-  min-height: 93vh;
+  background-size:cover;
+  width:100%;
+  min-height:100vh;
+  background-color: #f1f1f1;
+}
+.employees {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  width:100%;
+  margin-top: 1vh;
+}
+
+.info {
+  background: #fff;
+  border-radius: 4px;
+  margin: 20px auto;
+  padding: 20px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.50);
+  margin-left: 10%;
+  width: 75%;
+}
+.info h2 {
+  margin: 0 0 10px 0;
+  font-size: 30px;
+  color: #1aac83;
+}
+ .info p strong{
+  margin: 0;
+  font-size: 22px;
+  color: #555;
+}
+.info span {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+#account{
+color: #1aac83;
+font-size:30px;
+margin-top: 8vh;
 }
