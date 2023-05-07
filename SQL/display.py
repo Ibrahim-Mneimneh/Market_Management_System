@@ -102,6 +102,10 @@ def displayEntity(entity_input, username):
             # Close the CSV file
             csv_file.close()
 
+            if not config.has_section('email'):
+                print("Email is not set in config.cfg!")
+                return
+
             # Define the email sender and receiver
             email_sender = config.get('email', 'email_sender')
             email_password = config.get('email', 'email_password')
