@@ -25,9 +25,9 @@
             <b id="account"></b>
             <div class="items" id="items"></div>
         </div>
-        <div class="filter-alter">
-            <label>Items with Quantity less than: (Optional)</label>
-            <input type="number" placeholder="" id="filter"/>
+        <div class="filterItems">
+            <label>Items with Quantity less than:</label>
+            <input type="number" placeholder="" id="filterAmount"/>
             <div class="submit">
                 <button class="filter" onclick="filter()">Filter</button>
             </div>
@@ -44,10 +44,11 @@
         getResult();
         setTimeout(()=>{
             var itemInfo="";
+            console.log(itemNames);
             itemNames.map((name,index)=>{
                 itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price: "+itemPrices[index]+" $</strong></p></div>"
             })
-            document.getElementById("items").innerHTML=employeeInfo;
+            document.getElementById("items").innerHTML=itemInfo;
         },1000);
 
         function routing(newPage){
@@ -64,15 +65,30 @@
         function setQuantities(quantities){
             itemQuantities= quantities;
         }
-        function setPrices(price){
+        function setPrices(prices){
             itemPrices=prices;
         }
         function getResult(){
+
+            eel.getItemNames()(setNames);
+            eel.getItemQuantity()(setQuantities);
+            eel.getItemPrice()(setPrices);
+        }
+
+        function filter(){
+            var filterAmount= document.getElementById("filterAmount").value;
+            console.log(filterAmount)
+            eel.filterItemName(filterAmount)(setNames);
+            eel.filterItemQuantity(filterAmount)(setQuantities);
+            eel.filterItemPrice(filterAmount)(setPrices);
             setTimeout(()=>{
-                eel.getItemNames()(setNames);
-                eel.getItemQuantity()(setQuantities);
-                eel.getItemPrice()(setPrices);
-            },500);
+                var itemInfo="";
+                console.log(itemNames);
+                itemNames.map((name,index)=>{
+                itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price: "+itemPrices[index]+" $</strong></p></div>"
+                })
+            document.getElementById("items").innerHTML=itemInfo;
+            },1000);
         }
 
     </script>

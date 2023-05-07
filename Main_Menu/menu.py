@@ -302,15 +302,8 @@ def getEmpUnder(username):
     mycursor.execute("SELECT EmpId FROM Employee WHERE managerId = %s", (manId,))
     result = mycursor.fetchall()
     empIds = [row[0] for row in result]
-    print(empIds)
     return empIds
 
-
-# TODO this function is used inside 2 more functions getEmpOrderNum that takes the manger id calls the  "getEmpUnder"
-#  to get the empIds and get the number of orders for each employee and add the count to a new array with each
-#  to return an array of orderCounts and a second function "getEmpNames" that uses "getEmpUnder" to get each employee's full name (first and last
-#  concatenated with a space) and return an array with full names (all the 3 arrays you can use group by in "getEmpUnder" to group by
-#  firstname so that all the data would be grouped in the same way).
 
 @eel.expose
 def getEmpOrderNum(username):
@@ -373,14 +366,6 @@ def getEmpSalaries(username):
         return False
 
 
-# TODO a function "getStock" that takes each and returns barcodes of each item where amountLeft not equal to 0
-# Same from before there are 2 more functions "getStockAmount" and "getStockName" that each call the getStock and use its
-# array to return an array of amounts and names respectively
-
-# TODO a function promote that takes an empId and promoterId  and updates the isMan variable after checking it in case the isMan wasn't already 1
-# in case it wasn't we will take each employee under the promoter and set their  managerId to the empId so that the promoted employee is now their boss
-# the manager promoting will have to be the one managing the the promoted employee after so.
-
 def promote(username, empId):
     cursor = mydb.cursor()
     query = "select isMan from Account where empId = " + str(empId) + ";"
@@ -412,10 +397,9 @@ def getItemBarcode():
     barcodes = []
     try:
         cursor = mydb.cursor()
-        cursor.execute("SELECT barcode FROM item;")
+        cursor.execute("SELECT barcode FROM item order by name ;")
         result = cursor.fetchall()
         barcodes = [row[0] for row in result]
-        print(barcodes)
         return barcodes
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
@@ -431,7 +415,7 @@ def getItemNames():
             cursor.execute("SELECT name from item where barcode=\""+str(item)+"\";")
             result = cursor.fetchone()
             itemNames.append(result[0])
-        print(itemNames)
+        return itemNames
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
 
@@ -445,8 +429,8 @@ def getItemPrice():
         for item in itemBarcodes:
             cursor.execute("SELECT price from item where barcode=\""+str(item)+"\";")
             result = cursor.fetchone()
-            itemPrices.append(result[0])
-        print(itemPrices)
+            itemPrices.append(float(result[0]))
+        return itemPrices
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
 
@@ -458,14 +442,65 @@ def getItemQuantity():
         cursor = mydb.cursor()
         for item in itemBarcodes:
             cursor.execute("SELECT leftAmount from item where barcode=\""+str(item)+"\";")
-            result = cursor.fetchone()
-            itemQunatities.append(float(result[0]))
-        print(itemQunatities)
+            result = cursor.fetchone()[0]
+            itemQunatities.append(int(result))
+        return itemQunatities
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+def filterBarcode(leftAmount):
+    barcodes = []
+    try:
+        cursor = mydb.cursor()
+        cursor.execute("SELECT barcode FROM item where leftAmount<="+str(leftAmount)+" order by leftAmount;")
+        result = cursor.fetchall()
+        barcodes = [row[0] for row in result]
+        return barcodes
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
 
 
+@eel.expose
+def filterItemName(leftAmount):
+    itemBarcodes= filterBarcode(leftAmount)
+    itemNames = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT name from item where barcode=\""+str(item)+"\";")
+            result = cursor.fetchone()[0]
+            itemNames.append(result)
+        return itemNames
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
 
+@eel.expose
+def filterItemQuantity(leftAmount):
+    itemBarcodes= filterBarcode(leftAmount)
+    itemQunatities = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT leftAmount from item where barcode=\""+str(item)+"\";")
+            result = cursor.fetchone()[0]
+            itemQunatities.append(int(result))
+        return itemQunatities
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+@eel.expose
+def filterItemPrice(leftAmount):
+    itemBarcodes= filterBarcode(leftAmount)
+    itemPrices = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT price from item where barcode=\""+str(item)+"\";")
+            result = cursor.fetchone()[0]
+            itemPrices.append(int(result))
+        return itemPrices
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
 @eel.expose
 def getName(barcode):
     item_name = name(barcode)
@@ -494,7 +529,7 @@ def getProps(props):
     prop = props
 
 
-page = "menu.html"
+page = "stocks.html"
 
 eel.init("Menu")
 eel.start(page, size=(GetSystemMetrics(0), GetSystemMetrics(1)))
