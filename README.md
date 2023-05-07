@@ -1,5 +1,5 @@
 # Market Management System
-This project includes multiple python scripts for a market management system. The system allows new users to sign up, and existing users to log in. Once logged in, an employee can create an order (Store Order or Delivery Order). The system is designed to work with a MySQL database.
+This project includes multiple Python scripts for a Market Management System. The system allows new users to sign up, and existing users to log in. Once logged in, an employee can create an order (Store Order or Delivery Order). The system is designed to work with a MySQL database.
 
 ## Requirements
 - Python 3.x
