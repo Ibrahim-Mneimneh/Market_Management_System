@@ -41,6 +41,9 @@
         var itemNames=[];
         var itemQuantities=[];
         var itemPrices=[];
+        var supplierName=[];
+        var supplyQuantity=[];
+        var supplyPrice=[];
         getResult();
         setTimeout(()=>{
             var itemInfo="";
@@ -74,18 +77,29 @@
             eel.getItemQuantity()(setQuantities);
             eel.getItemPrice()(setPrices);
         }
-
+        function setSupplierName(names){
+            supplierName=names;
+        }
+        function setSupplyQuantity(quantity){
+            supplyQuantity=quantity;
+        }
+        function setSupplyPrice(price){
+            supplyPrice=price;
+        }
         function filter(){
             var filterAmount= document.getElementById("filterAmount").value;
             console.log(filterAmount)
             eel.filterItemName(filterAmount)(setNames);
             eel.filterItemQuantity(filterAmount)(setQuantities);
             eel.filterItemPrice(filterAmount)(setPrices);
+            eel.filterSupplierName(filterAmount)(setSupplierName);
+            eel.filterSupplyPrice(filterAmount)(setSupplyPrice);
+            eel.filterSupplyQuantity(filterAmount)(setSupplyQuantity);
             setTimeout(()=>{
                 var itemInfo="";
                 console.log(itemNames);
                 itemNames.map((name,index)=>{
-                itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price: "+itemPrices[index]+" $</strong></p></div>"
+                itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price: "+itemPrices[index]+" $</strong></p><p><strong>Suggest:</strong></p><p><strong>Supplier Name: "+supplierName[index]+" </strong></p><p><strong>Supply Quantity: "+supplyQuantity[index]+" </strong></p><p><strong>Supply Price: "+supplyPrice[index]+" $</strong></p></div>"
                 })
             document.getElementById("items").innerHTML=itemInfo;
             },1000);
