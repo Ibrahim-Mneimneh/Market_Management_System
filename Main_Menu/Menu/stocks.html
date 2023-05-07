@@ -14,8 +14,8 @@
             <span>Market Management System</span>
         </div>
         <div class="options">
-            <span>Staff</span>
-            <span style="color: #1aac83;" onclick="routing('stocks.html')">Stock</span>
+            <span onclick="routing('staff.html')">Staff</span>
+            <span style="color: #1aac83;">Stock</span>
             <span onclick="routing('Expenses.html')">Expenses</span>
             <span>Orders</span>
         </div>
@@ -44,6 +44,7 @@
         var supplierName=[];
         var supplyQuantity=[];
         var supplyPrice=[];
+        var supplierNumber=[];
         getResult();
         setTimeout(()=>{
             var itemInfo="";
@@ -52,7 +53,7 @@
                 itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price: "+itemPrices[index]+" $</strong></p></div>"
             })
             document.getElementById("items").innerHTML=itemInfo;
-        },1000);
+        },500);
 
         function routing(newPage){
             window.close();
@@ -72,7 +73,6 @@
             itemPrices=prices;
         }
         function getResult(){
-
             eel.getItemNames()(setNames);
             eel.getItemQuantity()(setQuantities);
             eel.getItemPrice()(setPrices);
@@ -86,7 +86,13 @@
         function setSupplyPrice(price){
             supplyPrice=price;
         }
+        function setSupplierNumber(number){
+            supplierNumber=number;
+        }
         function filter(){
+            itemNames=[];
+            itemQuantities=[];
+            itemPrices=[];
             var filterAmount= document.getElementById("filterAmount").value;
             console.log(filterAmount)
             eel.filterItemName(filterAmount)(setNames);
@@ -95,14 +101,21 @@
             eel.filterSupplierName(filterAmount)(setSupplierName);
             eel.filterSupplyPrice(filterAmount)(setSupplyPrice);
             eel.filterSupplyQuantity(filterAmount)(setSupplyQuantity);
+            eel.filterSupplierNumber(filterAmount)(setSupplierNumber);
             setTimeout(()=>{
                 var itemInfo="";
                 console.log(itemNames);
+                console.log(itemPrices);
                 itemNames.map((name,index)=>{
-                itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price: "+itemPrices[index]+" $</strong></p><p><strong>Suggest:</strong></p><p><strong>Supplier Name: "+supplierName[index]+" </strong></p><p><strong>Supply Quantity: "+supplyQuantity[index]+" </strong></p><p><strong>Supply Price: "+supplyPrice[index]+" $</strong></p></div>"
+                if(supplierName[index]==="There is no current supplier!"){
+                   itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price per unit: "+itemPrices[index]+" $</strong></p></div>"
+                }
+                else{
+                   itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price per unit: "+itemPrices[index]+" $</strong></p><p><strong>Suggest:</strong></p><p><strong>Supplier Name: "+supplierName[index]+" </strong></p><p><strong>Supplier's Phone Number: "+supplierNumber[index]+" </strong></p><p><strong>Supply Quantity: "+supplyQuantity[index]+" </strong></p><p><strong>Supply Price: "+supplyPrice[index]+" $</strong></p></div>"
+                }
                 })
             document.getElementById("items").innerHTML=itemInfo;
-            },1000);
+            },500);
         }
 
     </script>

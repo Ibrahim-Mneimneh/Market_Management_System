@@ -497,7 +497,7 @@ def filterItemPrice(leftAmount):
         for item in itemBarcodes:
             cursor.execute("SELECT price from item where barcode=\""+str(item)+"\";")
             result = cursor.fetchone()[0]
-            itemPrices.append(int(result))
+            itemPrices.append(float(result))
         return itemPrices
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
@@ -514,7 +514,7 @@ def filterSupplierIds(leftAmount):
             if result:
                 itemSupplierId.append(result[0])
             else:
-                itemSupplierId.append("Their is no current supplier!")
+                itemSupplierId.append("There is no current supplier!")
         return itemSupplierId
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
@@ -526,15 +526,15 @@ def filterSupplierName(leftAmount):
     try:
         cursor = mydb.cursor()
         for supplierId in supplierIds:
-            if supplierId != "Their is no current supplier!":
+            if supplierId != "There is no current supplier!":
                 cursor.execute("SELECT name from supplier where supplierId=" + str(supplierId) + " ;")
                 result = cursor.fetchone()
                 if result:
                     itemSupplierName.append(result[0])
                 else:
-                    itemSupplierName.append("Their is no current supplier!")
+                    itemSupplierName.append("There is no current supplier!")
             else:
-                itemSupplierName.append("Their is no current supplier!")
+                itemSupplierName.append("There is no current supplier!")
         return itemSupplierName
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
@@ -546,15 +546,15 @@ def filterSupplyPrice(leftAmount):
     try:
         cursor = mydb.cursor()
         for supplierId in supplierIds:
-            if supplierId != "Their is no current supplier!":
+            if supplierId != "There is no current supplier!":
                 cursor.execute("SELECT price*supplyAmount from item_supplier where supplierId="+str(supplierId)+";")
                 result = cursor.fetchone()
                 if result:
                     itemSupplyPrice.append(float(result[0]))
                 else:
-                    itemSupplyPrice.append("Their is no current supplier!")
+                    itemSupplyPrice.append("There is no current supplier!")
             else:
-                itemSupplyPrice.append("Their is no current supplier!")
+                itemSupplyPrice.append("There is no current supplier!")
         return itemSupplyPrice
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
@@ -566,19 +566,39 @@ def filterSupplyQuantity(leftAmount):
     try:
         cursor = mydb.cursor()
         for supplierId in supplierIds:
-            if supplierId != "Their is no current supplier!":
+            if supplierId != "There is no current supplier!":
                 cursor.execute("SELECT supplyAmount from item_supplier where supplierId="+str(supplierId)+";")
                 result = cursor.fetchone()
                 if result:
                     itemSupplyQuantity.append(int(result[0]))
                 else:
-                    itemSupplyQuantity.append("Their is no current supplier!")
+                    itemSupplyQuantity.append("There is no current supplier!")
             else:
-                itemSupplyQuantity.append("Their is no current supplier!")
+                itemSupplyQuantity.append("There is no current supplier!")
         return itemSupplyQuantity
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
 
+
+@eel.expose
+def filterSupplierNumber(leftAmount):
+    supplierIds = filterSupplierIds(leftAmount)
+    itemSupplyQuantity = []
+    try:
+        cursor = mydb.cursor()
+        for supplierId in supplierIds:
+            if supplierId != "There is no current supplier!":
+                cursor.execute("SELECT phoneNumber from supplier where supplierId="+str(supplierId)+";")
+                result = cursor.fetchone()
+                if result:
+                    itemSupplyQuantity.append(result[0])
+                else:
+                    itemSupplyQuantity.append("There is no current supplier!")
+            else:
+                itemSupplyQuantity.append("There is no current supplier!")
+        return itemSupplyQuantity
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
 @eel.expose
 def getName(barcode):
     item_name = name(barcode)
