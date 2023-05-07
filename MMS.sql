@@ -10,7 +10,7 @@ Lastname VARCHAR(30) NOT NULL,
 Salary DECIMAL(10,2) NOT NULL,
 PhoneNumber VARCHAR(20) NOT NULL,
 managerId INT DEFAULT 20230000,
-FOREIGN KEY (Managerid) REFERENCES Employee(Empid)
+FOREIGN KEY (Managerid) REFERENCES Employee(Empid) on delete set null
 );
 ALTER TABLE Employee AUTO_INCREMENT=20230000;
 

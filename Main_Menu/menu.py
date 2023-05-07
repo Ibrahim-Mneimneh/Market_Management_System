@@ -8,7 +8,7 @@ from win32api import GetSystemMetrics
 from datetime import date
 
 file_path = "../config.cfg"
-prop=""
+prop = ""
 if not os.path.exists(file_path):
     subprocess.run(['python', '../SQL/SQLprompt.py'])
 
@@ -18,7 +18,7 @@ try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Ib97mn69ji*",
+        password="zouzou02",
         port=3306,
         database="mms"
     )
@@ -125,10 +125,10 @@ def login(username_email, password):
             global prop
             prop = account[0]
             print(account[0] + " just logged in!")
-            #check if the employee is an admin
-            is_manager=account[3]
+            # check if the employee is an admin
+            is_manager = account[3]
             if is_manager:
-                print("Manager "+account[0] + " just logged in!")
+                print("Manager " + account[0] + " just logged in!")
                 return "Logging Manager In."
             return "Logging In."
         else:
@@ -153,7 +153,8 @@ def add_order(qrCode, quantity, empUsername, promoCode, isOnline):
         mycursor.execute(query)
         result = mycursor.fetchone()[0]
         if result < int(itemQuantity) or int(itemQuantity) == 0:
-            return "Requested amount of '" + item + "' is " + str(itemQuantity) + " not available. Available amount is " + result
+            return "Requested amount of '" + item + "' is " + str(
+                itemQuantity) + " not available. Available amount is " + result
     # Create the order, we need to grab the employee's ID first
     currentDate = str(date.today())
     try:
@@ -163,14 +164,16 @@ def add_order(qrCode, quantity, empUsername, promoCode, isOnline):
         empId = cursor.fetchone()
         print("EmpId: " + str(empId[0]))
         if promoCode == "":
-            query = "Insert into orders(date,price,isOnline,EmpId) values(\"" + currentDate + "\",1,"+str(isOnline)+"," + str(
+            query = "Insert into orders(date,price,isOnline,EmpId) values(\"" + currentDate + "\",1," + str(
+                isOnline) + "," + str(
                 empId[0]) + ");"
             # add promo code
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
         else:
-            query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\",1,"+str(isOnline)+"," + str(
+            query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\",1," + str(
+                isOnline) + "," + str(
                 empId[0]) + ",\"" + promoCode + "\");"
             # add promo code
             cursor = mydb.cursor()
@@ -223,7 +226,7 @@ def add_order(qrCode, quantity, empUsername, promoCode, isOnline):
 @eel.expose
 def add_delivery_order(qrCode, quantity, empUsername, promoCode, firstname, lastname, phoneNumber, address):
     # use add order to add an order
-    result = add_order(qrCode, quantity, empUsername, promoCode,True)
+    result = add_order(qrCode, quantity, empUsername, promoCode, True)
     if result == "Order created Successfully!":
         try:
             query = "select distinct(last_insert_id()) from Item;"
@@ -280,14 +283,15 @@ def name(barcode):
         print("Couldn't insert the record to the database, an integrity constraint failed!")
         return "Item not found!"
 
-#takes a manager's username and returns an array of empIds
+
+# takes a manager's username and returns an array of empIds
 def getEmpUnder(username):
     try:
         mycursor = mydb.cursor()
-        mycursor.execute("SELECT EmpId FROM account WHERE username = \""+str(username)+"\"")
+        mycursor.execute("SELECT EmpId FROM account WHERE username = \"" + str(username) + "\"")
         manId = mycursor.fetchone()[0]
-    # Check if manId is a manager
-        mycursor.execute("SELECT EmpId FROM Employee WHERE EmpId =\""+str(manId)+"\";")
+        # Check if manId is a manager
+        mycursor.execute("SELECT EmpId FROM Employee WHERE EmpId =\"" + str(manId) + "\";")
         result = mycursor.fetchone()
     except:
         return "manId is not a manger."
@@ -301,6 +305,7 @@ def getEmpUnder(username):
     print(empIds)
     return empIds
 
+
 # TODO this function is used inside 2 more functions getEmpOrderNum that takes the manger id calls the  "getEmpUnder"
 #  to get the empIds and get the number of orders for each employee and add the count to a new array with each
 #  to return an array of orderCounts and a second function "getEmpNames" that uses "getEmpUnder" to get each employee's full name (first and last
@@ -312,11 +317,11 @@ def getEmpOrderNum(username):
     empIds = getEmpUnder(username)
     if empIds == "manId is not a manager.":
         return "manId is not a manager."
-    empOrderNum=[]
+    empOrderNum = []
     try:
         cursor = mydb.cursor()
         for empId in empIds:
-            query = "SELECT count(*) FROM orders WHERE EmpId="+str(empId)+";"
+            query = "SELECT count(*) FROM orders WHERE EmpId=" + str(empId) + ";"
             cursor.execute(query)
             empOrderNum.append(cursor.fetchone()[0])
 
@@ -327,9 +332,9 @@ def getEmpOrderNum(username):
     else:
         return False
 
+
 @eel.expose
 def getEmpNames(username):
-
     empIds = getEmpUnder(username)
     if empIds == "manId is not a manager.":
         return "manId is not a manager."
@@ -337,9 +342,9 @@ def getEmpNames(username):
     try:
         cursor = mydb.cursor()
         for empId in empIds:
-            cursor.execute("SELECT Firstname, Lastname FROM Employee WHERE EmpId="+str(empId)+";")
-            result=cursor.fetchone()
-            fullnames.append(result[0]+" "+result[1])
+            cursor.execute("SELECT Firstname, Lastname FROM Employee WHERE EmpId=" + str(empId) + ";")
+            result = cursor.fetchone()
+            fullnames.append(result[0] + " " + result[1])
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
     if fullnames:
@@ -350,7 +355,6 @@ def getEmpNames(username):
 
 @eel.expose
 def getEmpSalaries(username):
-
     empIds = getEmpUnder(username)
     if empIds == "manId is not a manager.":
         return "manId is not a manager."
@@ -358,8 +362,8 @@ def getEmpSalaries(username):
     try:
         cursor = mydb.cursor()
         for empId in empIds:
-            cursor.execute("SELECT salary FROM Employee WHERE EmpId="+str(empId)+";")
-            result=cursor.fetchone()
+            cursor.execute("SELECT salary FROM Employee WHERE EmpId=" + str(empId) + ";")
+            result = cursor.fetchone()
             salaries.append(int(result[0]))
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
@@ -367,16 +371,45 @@ def getEmpSalaries(username):
         return salaries
     else:
         return False
-#TODO a function "getStock" that takes each and returns barcodes of each item where amountLeft not equal to 0
+
+
+# TODO a function "getStock" that takes each and returns barcodes of each item where amountLeft not equal to 0
 # Same from before there are 2 more functions "getStockAmount" and "getStockName" that each call the getStock and use its
 # array to return an array of amounts and names respectively
 
-#TODO a function promote that takes an empId and promoterId  and updates the isMan variable after checking it in case the isMan wasn't already 1
+# TODO a function promote that takes an empId and promoterId  and updates the isMan variable after checking it in case the isMan wasn't already 1
 # in case it wasn't we will take each employee under the promoter and set their  managerId to the empId so that the promoted employee is now their boss
 # the manager promoting will have to be the one managing the the promoted employee after so.
 
-#TODO :) have fun i guess
+def promote(username, empId):
+    cursor = mydb.cursor()
+    query = "select isMan from Account where empId = " + str(empId) + ";"
+    cursor.execute(query)
+    result = cursor.fetchone()
 
+    if result is not None and result[0] == 1:
+        # empId is already a manager
+        return str(empId) + " is already a manager"
+
+    query = "UPDATE Account SET isMan = 1 WHERE empId = " + str(empId) + ";"
+    cursor.execute(query)
+
+    empIds = getEmpUnder(username)
+    for id in empIds:
+        query = "UPDATE Employee SET managerId = %s WHERE EmpId = %s"
+        param = (str(empId), str(id))
+        cursor.execute(query, param)
+
+    query = "update Employee set managerId = (select empId from Account where username = \"" + username + "\") where EmpId = " + str(
+        empId) + ";"
+    cursor.execute(query)
+
+    mydb.commit()
+    cursor.close()
+    return str(empId) + " is now a manager!"
+
+
+# TODO :) have fun i guess
 
 
 @eel.expose

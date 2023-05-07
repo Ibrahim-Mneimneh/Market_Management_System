@@ -144,7 +144,7 @@ def displayEntity(entity_input, username):
             # TODO Remove query
             values = tree.item(row, 'values')
             print(values[0])
-            print(values[1])
+
             if entity == "Account":
                 query = "SELECT empid FROM Account WHERE username = \"" + values[0] + "\""
                 mycursor.execute(query)
@@ -154,7 +154,7 @@ def displayEntity(entity_input, username):
                 # Delete the row from the database
                 query = "DELETE FROM Account WHERE username = \"" + values[0] + "\""
                 mycursor.execute(query)
-                query = "DELETE FROM Employee WHERE empid = " + str(empid)
+                query = "DELETE FROM Employee WHERE EmpId = " + str(empid)
                 mycursor.execute(query)
                 mydb.commit()
 
@@ -169,7 +169,7 @@ def displayEntity(entity_input, username):
                 # Delete the row from the database
                 query = "DELETE FROM Account WHERE username = \"" + str(username) + "\""
                 mycursor.execute(query)
-                query = "DELETE FROM Employee WHERE empid = " + values[0]
+                query = "DELETE FROM Employee WHERE EmpId = " + values[0]
                 mycursor.execute(query)
                 mydb.commit()
 
