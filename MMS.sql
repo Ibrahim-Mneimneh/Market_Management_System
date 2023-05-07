@@ -97,7 +97,8 @@ CREATE TABLE Customer (
 );
 
 insert into Employee (Firstname, Lastname, Salary, PhoneNumber, managerId) values ("Hadi", "Al Mubasher", 1000.0, "03454123",null);
-INSERT INTO Account VALUES ("hadim", "sueuksegishag748493", "h@gmail.com", True, (select EmpId from Employee where PhoneNumber = "03454123"));
+INSERT INTO Account VALUES ("hadim", "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", "h.mubasher@bau.edu.lb", True, (select EmpId from Employee where PhoneNumber = "03454123"));
+
 select * from Employee;
 select * from Account;
 
@@ -107,10 +108,20 @@ insert into Supplier (Name, phoneNumber) values ("HAJJAR FOODS SAL","08500053");
 insert into Supplier (Name, phoneNumber) values ("Modern Markets Distribution Sal","03028377");
 insert into Supplier (Name, phoneNumber) values ("Akiki Brothers","76444327");
 
-insert into Item values (745178984232,"Halawa with Chocolate 800g",2.5,30);
-insert into Item values (745240328773,"Date Jam 400g",1,30);
-insert into Item values (745240328766,"Pear Jam 400g",0.99,10);
-insert into Item values (745240328797,"Strawberry Jam 400g",0.99,0);
+insert into Item values (745178984232, "Halawa with Chocolate 800g",2.5,30);
+insert into Item values (745240328773, "Date Jam 400g",1,30);
+insert into Item values (745240328766, "Pear Jam 400g",0.99,10);
+insert into Item values (745240328797, "Strawberry Jam 400g",0.99,0);
+insert into Item values (744998767385, "Labneh 500g", 3.5, 20);
+insert into Item values (744839211470, "Kishk 400g", 4.99, 15);
+insert into Item values (744516786642, "Zaatar Mix 200g", 2.49, 25);
+insert into Item values (745014729392, "Dried Figs 250g", 4.99, 20);
+insert into Item values (745283940274, "Pickled Turnips 1kg", 6.99, 10);
+insert into Item values (745361907753, "Lebanese Coffee 200g", 7.99, 5);
+insert into Item values (745523316972, "Halawa with Pistachios 500g", 5.5, 15);
+insert into Item values (744706142144, "Sumac 100g", 1.99, 30);
+insert into Item values (744968916720, "Pomegranate Molasses 500ml", 3.99, 20);
+insert into Item values (745078101509, "Kibbeh Mix 1kg", 10.99, 5);
 
 insert into Item_Supplier (barcode, supplierId, price, supplyAmount, date) values (745178984232,101,2,30,'2023-04-22');
 
