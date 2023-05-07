@@ -408,8 +408,62 @@ def promote(username, empId):
     cursor.close()
     return str(empId) + " is now a manager!"
 
+def getItemBarcode():
+    barcodes = []
+    try:
+        cursor = mydb.cursor()
+        cursor.execute("SELECT barcode FROM item;")
+        result = cursor.fetchall()
+        barcodes = [row[0] for row in result]
+        print(barcodes)
+        return barcodes
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
 
-# TODO :) have fun i guess
+
+@eel.expose
+def getItemNames():
+    itemBarcodes= getItemBarcode()
+    itemNames = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT name from item where barcode=\""+str(item)+"\";")
+            result = cursor.fetchone()
+            itemNames.append(result[0])
+        print(itemNames)
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+
+@eel.expose
+def getItemPrice():
+    itemBarcodes= getItemBarcode()
+    itemPrices = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT price from item where barcode=\""+str(item)+"\";")
+            result = cursor.fetchone()
+            itemPrices.append(result[0])
+        print(itemPrices)
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+@eel.expose
+def getItemQuantity():
+    itemBarcodes= getItemBarcode()
+    itemQunatities = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT leftAmount from item where barcode=\""+str(item)+"\";")
+            result = cursor.fetchone()
+            itemQunatities.append(float(result[0]))
+        print(itemQunatities)
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
 
 
 @eel.expose

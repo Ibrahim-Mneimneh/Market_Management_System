@@ -39,7 +39,7 @@
             console.log(empNames);
             console.log(empOrder);
             empNames.map((name,index)=>{
-                employeeInfo=employeeInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Finished Orders:"+empOrder[index]+"</strong></p><p><strong>Salary: "+empSalaries[index]+" $</strong></p></div>"
+                employeeInfo=employeeInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Finished Orders: "+empOrder[index]+"</strong></p><p><strong>Salary: "+empSalaries[index]+" $</strong></p></div>"
             })
             document.getElementById("employees").innerHTML=employeeInfo;
         },1000);

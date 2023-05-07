@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Market Management System (Stocks)</title>
+        <link href="stocks.css" rel="stylesheet">
+        <script type="text/javascript" src="/eel.js"></script>
+
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="./grocery-store .png" alt="image">
+            <span>Market Management System</span>
+        </div>
+        <div class="options">
+            <span>Staff</span>
+            <span style="color: #1aac83;" onclick="routing('stocks.html')">Stock</span>
+            <span onclick="routing('Expenses.html')">Expenses</span>
+            <span>Orders</span>
+        </div>
+    </div>
+    <div class="home">
+        <div class="item-section">
+            <b id="account"></b>
+            <div class="items" id="items"></div>
+        </div>
+        <div class="filter-alter">
+            <label>Items with Quantity less than: (Optional)</label>
+            <input type="number" placeholder="" id="filter"/>
+            <div class="submit">
+                <button class="filter" onclick="filter()">Filter</button>
+            </div>
+                <b id="message" class="message"></b>
+                <b id="result" class="result"></b>
+        </div>
+    </div>
+
+    <script>
+        eel.passProps()(receivedData);
+        var itemNames=[];
+        var itemQuantities=[];
+        var itemPrices=[];
+        getResult();
+        setTimeout(()=>{
+            var itemInfo="";
+            itemNames.map((name,index)=>{
+                itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price: "+itemPrices[index]+" $</strong></p></div>"
+            })
+            document.getElementById("items").innerHTML=employeeInfo;
+        },1000);
+
+        function routing(newPage){
+            window.close();
+            eel.routing(newPage);
+        }
+        function receivedData(props){
+            props= "Welcome "+props;
+            document.getElementById("account").innerHTML=props;
+        }
+        function setNames(names){
+            itemNames= names;
+        }
+        function setQuantities(quantities){
+            itemQuantities= quantities;
+        }
+        function setPrices(price){
+            itemPrices=prices;
+        }
+        function getResult(){
+            setTimeout(()=>{
+                eel.getItemNames()(setNames);
+                eel.getItemQuantity()(setQuantities);
+                eel.getItemPrice()(setPrices);
+            },500);
+        }
+
+    </script>
+</body>
+</html>
