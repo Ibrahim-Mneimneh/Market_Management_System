@@ -6,6 +6,7 @@ import mysql.connector
 import hashlib
 from win32api import GetSystemMetrics
 from datetime import date
+from SQL.display import displayEntity
 
 file_path = "../config.cfg"
 prop = ""
@@ -599,6 +600,11 @@ def filterSupplierNumber(leftAmount):
         return itemSupplyQuantity
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
+
+@eel.expose
+def display(entity,username):
+    displayEntity(entity,username)
+
 @eel.expose
 def getName(barcode):
     item_name = name(barcode)

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Market Management System (Stocks)</title>
-        <link href="stocks.css" rel="stylesheet">
+        <link href="orders.css" rel="stylesheet">
         <script type="text/javascript" src="/eel.js"></script>
 
 </head>
@@ -15,8 +15,8 @@
         </div>
         <div class="options">
             <span onclick="routing('manager.html')">Staff</span>
-            <span style="color: #1aac83;">Stock</span>
-            <span onclick="routing('orders.html')">Orders</span>
+            <span onclick="routing('stocks.html')">Stock</span>
+            <span style="color: #1aac83;">Orders</span>
         </div>
     </div>
     <div class="home">
@@ -24,8 +24,8 @@
             <b id="account"></b>
             <div class="items" id="items"></div>
         </div>
-        <div class="filterItems">
-            <label>Items with Quantity less than:</label>
+        <div class="filterOrders">
+            <label>Employee username:</label>
             <input type="number" placeholder="" id="filterAmount"/>
             <div class="submit">
                 <button class="filter" onclick="filter()">Filter</button>

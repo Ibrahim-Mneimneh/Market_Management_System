@@ -1,0 +1,148 @@
+@import url("https://fonts.googleapis.com/css2?family=Dongle:wght@300;400&family=Inter:wght@400;600;700&display=swap");
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  position: fixed;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background-color: black;
+  font-family: "Dongle";
+  color: white;
+  width: 100%;
+  height: 7vh;
+  font-weight: 400;
+  font-size: 40px;
+  gap: 10px;
+}
+.logo {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+.logo > img {
+  width: 30px;
+  height: 30px;
+  margin: 0px 8px 5px 10px;
+}
+.options {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 40px;
+  margin-right: 60px;
+}
+.options > span:hover {
+  cursor: pointer;
+  color: #1aac83;
+}
+.home{
+  margin-top: 7vh;
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  background-size: cover;
+  color: black;
+  font-family: "Dongle", sans-serif;
+  font-weight: 400;
+  background-color: #f1f1f1;
+  width: 100%;
+  min-height: 93vh;
+  padding-top: 3vh;
+}
+.item-section{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width:100%;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  width:100%;
+  margin-top: 20px;
+}
+
+.info {
+  background: #fff;
+  border-radius: 4px;
+  margin: 20px auto;
+  padding: 20px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.50);
+  margin-left: 10%;
+  width: 75%;
+}
+.info h2 {
+  margin: 0 0 10px 0;
+  font-size: 30px;
+  color: #1aac83;
+}
+ .info p strong{
+  margin: 0;
+  font-size: 22px;
+  color: #555;
+}
+.info span {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+#account{
+color: #1aac83;
+font-size:30px;
+}
+.filterOrders{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 30px;
+  padding-top:9vh;
+  width:100%;
+}
+label {
+  font-weight: 400;
+}
+input {
+  padding: 10px;
+  margin-bottom: 20px;
+  width: 75%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+button {
+  width:80px;
+  height:40px;
+  border: 0;
+  color: #fff;
+  padding: 5px 10px 5px 10px;
+  font-family: "Dongle";
+  font-size: 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.filter {
+  display: flex;
+  flex-direction: row;
+  align-items:center;
+  justify-content:center;
+  margin-left:200px;
+  background-color: #1aac83;
+  cursor: pointer;
+}
+.filter:hover {
+  background-color: #1db199;
+}
