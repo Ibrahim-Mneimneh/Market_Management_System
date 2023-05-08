@@ -194,11 +194,50 @@ def displayEntity(entity_input, username):
                 tree.delete(row)
 
             if entity == "Item":
-                query = "DELETE FROM Item WHERE Barcode = " + values[0]
+                # Check if entry exists before deleting
+                barcode = values[0]
+                query = "SELECT * FROM Item_Supplier WHERE barcode = %s"
+                mycursor.execute(query, (barcode,))
+                result = mycursor.fetchone()
+                if result:
+                    # Entry exists, execute deletion query
+                    query = "DELETE FROM Item_Supplier WHERE barcode = %s"
+                    mycursor.execute(query, (barcode,))
+                    print("Entry successfully deleted from database.")
+                else:
+                    # Entry doesn't exist, print error message
+                    print(f"No entry found in database with barcode {barcode}.")
+
+                query = "DELETE FROM Item WHERE Barcode = " + barcode
                 mycursor.execute(query)
                 mydb.commit()
 
                 tree.delete(row)
+
+            if entity == "Promocode":
+                query = "DELETE FROM Promocode WHERE Promocode = \"" + values[0] + "\""
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
+            if entity == "Customer":
+                query = "DELETE FROM Customer WHERE CustomerId = " + values[0]
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
+            if entity == "Orders":
+                query = "DELETE FROM item_order WHERE OrderId = " + values[0]
+                mycursor.execute(query)
+
+                query = "DELETE FROM Orders WHERE OrderId = " + values[0]
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
 
     # Create a Frame to hold the buttons
     button_frame = customtkinter.CTkFrame(root)
@@ -266,4 +305,4 @@ def displayEntity(entity_input, username):
     mydb.close()
 
 
-displayEntity("Account", 'zouheirn')
+#displayEntity("Orders", 'zouheirn')
