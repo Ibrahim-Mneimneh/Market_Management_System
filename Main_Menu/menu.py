@@ -622,7 +622,64 @@ def filterSupplierNumber(leftAmount):
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
 
+def getOrderNumber():
+    orderNumber = []
+    try:
+        cursor = mydb.cursor()
+        cursor.execute("SELECT orderId FROM orders order by date;")
+        result = cursor.fetchall()
+        orderNumber = [row[0] for row in result]
+        return orderNumber
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
 
+@eel.expose
+def getOrderNumbers():
+    orderNumber = []
+    try:
+        cursor = mydb.cursor()
+        cursor.execute("SELECT orderId FROM orders order by date;")
+        result = cursor.fetchall()
+        orderNumber = [row[0] for row in result]
+        return orderNumber
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+@eel.expose
+def getOrderPrice():
+    orderIds=getOrderNumber()
+    orderPrices=[]
+    try:
+        cursor = mydb.cursor()
+        for order in orderIds:
+            cursor.execute("SELECT price from orders where orderId="+str(order)+";")
+            result = cursor.fetchone()[0]
+            orderPrices.append(float(result))
+        print(orderPrices)
+        return orderPrices
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+
+@eel.expose
+def getCustomerNames():
+    orderIds=getOrderNumber()
+    customerNames=[]
+    try:
+        cursor = mydb.cursor()
+        for order in orderIds:
+            cursor.execute("SELECT isOnline from orders where orderId="+str(order)+";")
+            result = cursor.fetchone()[0]
+            if result==1 :
+                cursor.execute("SELECT firstname,lastname from customer where orderId=" + str(order) + ";")
+                names = cursor.fetchone()
+                customerNames.append(names[0] + " " + names[1])
+            else:
+                customerNames.append("Order has no customer!")
+        print(customerNames)
+        return customerNames
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
 @eel.expose
 def getName(barcode):
     item_name = name(barcode)
@@ -654,7 +711,7 @@ def getProps(props):
 def display(entityName,username):
     displayEntity(entityName,username)
 
-page = "menu.html"
+page = "orders.html"
 
 eel.init("Menu")
 eel.start(page, size=(GetSystemMetrics(0), GetSystemMetrics(1)))

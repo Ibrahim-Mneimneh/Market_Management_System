@@ -41,15 +41,19 @@
         eel.passProps()(receivedData);
         var orderNumbers=[];
         var orderPrices=[];
-        var empNames=[]
+        var customerNames=[]
         getResult();
         setTimeout(()=>{
-            var itemInfo="";
-            console.log(itemNames);
-            itemNames.map((name,index)=>{
-                itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price: "+itemPrices[index]+" $</strong></p></div>"
+            var orderInfo="";
+            orderNumbers.map((name,index)=>{
+                if(customerNames[index]==="Order has no customer!"){
+                    orderInfo=orderInfo+"<div class='info' id='"+index+"'><h2>Order Number: "+orderNumbers[index]+"</h2><p><strong>Order Price: "+orderPrices[index]+"$</strong></p></div>"
+                }
+                else{
+                    orderInfo=orderInfo+"<div class='info' id='"+index+"'><h2>Order Number: "+orderNumbers[index]+"</h2><p><strong>Order Price: "+orderPrices[index]+"$</strong></p><p><strong> Customer: "+customerNames[index]+" </strong></p></div>"
+                }
             })
-            document.getElementById("items").innerHTML=itemInfo;
+            document.getElementById("orders").innerHTML=orderInfo;
         },500);
 
         function routing(newPage){
@@ -64,15 +68,15 @@
             orderNumbers=numbers;
         }
         function setOrderPrices(price){
-            orderPrices=names;
+            orderPrices=price;
         }
-        function setEmpOrder(names){
-            empNames=names;
+        function setCustomerNames(names){
+            customerNames=names;
         }
         function getResult(){
             eel.getOrderNumbers()(setOrderNumber);
             eel.getOrderPrice()(setOrderPrices);
-            eel.getEmpOrder()(setEmpNames);
+            eel.getCustomerNames()(setCustomerNames);
         }
 
     </script>
