@@ -303,6 +303,3 @@ def displayEntity(entity_input, username):
 
     # Close the database connection
     mydb.close()
-
-
-#displayEntity("Orders", 'zouheirn')

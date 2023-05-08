@@ -711,7 +711,7 @@ def getProps(props):
 def display(entityName,username):
     displayEntity(entityName,username)
 
-page = "orders.html"
+page = "menu.html"
 
 eel.init("Menu")
 eel.start(page, size=(GetSystemMetrics(0), GetSystemMetrics(1)))
