@@ -133,7 +133,7 @@
                 var username= document.getElementById("account").innerHTML;
                 username=username.split(" ")[1];
 
-                promoCode=document.getElementById("promoCode").innerHTML;
+                promoCode=document.getElementById("promoCode").value;
 
                 eel.add_order(barcodes,quantities,username,promoCode,true)(handleError);
             }

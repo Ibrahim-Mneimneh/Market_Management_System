@@ -6,7 +6,6 @@ import mysql.connector
 import hashlib
 from win32api import GetSystemMetrics
 from datetime import date
-from SQL.display import displayEntity
 
 file_path = "../config.cfg"
 prop = ""
@@ -19,7 +18,7 @@ try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="",
+        password="password",
         port=3306,
         database="mms"
     )
@@ -147,15 +146,32 @@ def add_order(qrCode, quantity, empUsername, promoCode, isOnline):
         mycursor = mydb.cursor()
         mycursor.execute("SELECT EXISTS(SELECT barCode FROM Item WHERE barCode =" + item + ");")
         result = mycursor.fetchone()[0]
+
         if result != 1:
             return "The item '" + item + "' doesn't exist."
+
         mycursor = mydb.cursor()
         query = "SELECT leftAmount FROM Item WHERE barCode = " + item + ";"
         mycursor.execute(query)
         result = mycursor.fetchone()[0]
+
         if result < int(itemQuantity) or int(itemQuantity) == 0:
-            return "Requested amount of '" + item + "' is " + str(
-                itemQuantity) + " not available. Available amount is " + result
+            return "Available amount of '" + str(item) + "' is " + str(result)
+
+    if promoCode:
+        # check if barcode is not used before and is real
+        try:
+            cursor = mydb.cursor()
+            cursor.execute("Select promoCode from promoCode where promoCode=\"" + str(promoCode) + "\";")
+            isPromoCode = cursor.fetchone()
+            if isPromoCode:
+                print("Barcode is Available!")
+            else:
+                return "Barcode doesn't exist."
+
+        except  mysql.connector.IntegrityError as error:
+            print("Failed to connect to database!")
+
     # Create the order, we need to grab the employee's ID first
     currentDate = str(date.today())
     try:
@@ -164,19 +180,18 @@ def add_order(qrCode, quantity, empUsername, promoCode, isOnline):
         cursor.execute(query)
         empId = cursor.fetchone()
         print("EmpId: " + str(empId[0]))
-        if promoCode == "":
-            query = "Insert into orders(date,price,isOnline,EmpId) values(\"" + currentDate + "\",1," + str(
+        if promoCode:
+            query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\",1," + str(
                 isOnline) + "," + str(
-                empId[0]) + ");"
+                empId[0]) + ",\"" + str(promoCode) + "\");"
             # add promo code
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
         else:
-            query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\",1," + str(
+            query = "Insert into orders(date,price,isOnline,EmpId) values(\"" + currentDate + "\",1," + str(
                 isOnline) + "," + str(
-                empId[0]) + ",\"" + promoCode + "\");"
-            # add promo code
+                empId[0]) + ");"
             cursor = mydb.cursor()
             cursor.execute(query)
             mydb.commit()
@@ -218,6 +233,10 @@ def add_order(qrCode, quantity, empUsername, promoCode, isOnline):
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
+        if promoCode:
+            query = "Update orders set price=price-(price*(select discount from PromoCode where promoCode=\"" + str(promoCode) + "\")/100) where orderId=" + str(order_id[0]) + ";"
+            cursor.execute(query)
+            mydb.commit()
         print("Order number " + str(order_id[0]) + " price was updated successfully!!")
         return "Order created Successfully!"
     except mysql.connector.IntegrityError as error:
@@ -601,9 +620,6 @@ def filterSupplierNumber(leftAmount):
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
 
-@eel.expose
-def display(entity,username):
-    displayEntity(entity,username)
 
 @eel.expose
 def getName(barcode):
@@ -633,7 +649,7 @@ def getProps(props):
     prop = props
 
 
-page = "stocks.html"
+page = "menu.html"
 
 eel.init("Menu")
 eel.start(page, size=(GetSystemMetrics(0), GetSystemMetrics(1)))
