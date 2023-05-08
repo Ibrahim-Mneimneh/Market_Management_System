@@ -19,31 +19,29 @@
             <span style="color: #1aac83;">Orders</span>
         </div>
     </div>
-    <div class="home">
-        <div class="item-section">
-            <b id="account"></b>
-            <div class="items" id="items"></div>
+    <div class="navbar">
+        <div class="logo">
+            <img src="./grocery-store .png" alt="image">
+            <span>Market Management System</span>
         </div>
-        <div class="filterOrders">
-            <label>Employee username:</label>
-            <input type="number" placeholder="" id="filterAmount"/>
-            <div class="submit">
-                <button class="filter" onclick="filter()">Filter</button>
-            </div>
-                <b id="message" class="message"></b>
-                <b id="result" class="result"></b>
+        <div class="options">
+            <span onclick="routing('manager.html')">Staff</span>
+            <span onclick="routing('stocks.html')">Stock</span>
+            <span style="color: #1aac83;">Orders</span>
+        </div>
+    </div>
+    <div class="orders-section">
+        <b id="account"></b>
+        <div class="orders" id="orders">
+
         </div>
     </div>
 
     <script>
         eel.passProps()(receivedData);
-        var itemNames=[];
-        var itemQuantities=[];
-        var itemPrices=[];
-        var supplierName=[];
-        var supplyQuantity=[];
-        var supplyPrice=[];
-        var supplierNumber=[];
+        var orderNumbers=[];
+        var orderPrices=[];
+        var empNames=[]
         getResult();
         setTimeout(()=>{
             var itemInfo="";
@@ -62,59 +60,19 @@
             props= "Welcome "+props;
             document.getElementById("account").innerHTML=props;
         }
-        function setNames(names){
-            itemNames= names;
+        function setOrderNumber(numbers){
+            orderNumbers=numbers;
         }
-        function setQuantities(quantities){
-            itemQuantities= quantities;
+        function setOrderPrices(price){
+            orderPrices=names;
         }
-        function setPrices(prices){
-            itemPrices=prices;
+        function setEmpOrder(names){
+            empNames=names;
         }
         function getResult(){
-            eel.getItemNames()(setNames);
-            eel.getItemQuantity()(setQuantities);
-            eel.getItemPrice()(setPrices);
-        }
-        function setSupplierName(names){
-            supplierName=names;
-        }
-        function setSupplyQuantity(quantity){
-            supplyQuantity=quantity;
-        }
-        function setSupplyPrice(price){
-            supplyPrice=price;
-        }
-        function setSupplierNumber(number){
-            supplierNumber=number;
-        }
-        function filter(){
-            itemNames=[];
-            itemQuantities=[];
-            itemPrices=[];
-            var filterAmount= document.getElementById("filterAmount").value;
-            console.log(filterAmount)
-            eel.filterItemName(filterAmount)(setNames);
-            eel.filterItemQuantity(filterAmount)(setQuantities);
-            eel.filterItemPrice(filterAmount)(setPrices);
-            eel.filterSupplierName(filterAmount)(setSupplierName);
-            eel.filterSupplyPrice(filterAmount)(setSupplyPrice);
-            eel.filterSupplyQuantity(filterAmount)(setSupplyQuantity);
-            eel.filterSupplierNumber(filterAmount)(setSupplierNumber);
-            setTimeout(()=>{
-                var itemInfo="";
-                console.log(itemNames);
-                console.log(itemPrices);
-                itemNames.map((name,index)=>{
-                if(supplierName[index]==="There is no current supplier!"){
-                   itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price per unit: "+itemPrices[index]+" $</strong></p></div>"
-                }
-                else{
-                   itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price per unit: "+itemPrices[index]+" $</strong></p><p><strong>Suggest:</strong></p><p><strong>Supplier Name: "+supplierName[index]+" </strong></p><p><strong>Supplier's Phone Number: "+supplierNumber[index]+" </strong></p><p><strong>Supply Quantity: "+supplyQuantity[index]+" </strong></p><p><strong>Supply Price: "+supplyPrice[index]+" $</strong></p></div>"
-                }
-                })
-            document.getElementById("items").innerHTML=itemInfo;
-            },500);
+            eel.getOrderNumbers()(setOrderNumber);
+            eel.getOrderPrice()(setOrderPrices);
+            eel.getEmpOrder()(setEmpNames);
         }
 
     </script>

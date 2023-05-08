@@ -6,6 +6,7 @@ import mysql.connector
 import hashlib
 from win32api import GetSystemMetrics
 from datetime import date
+from SQL.display import displayEntity
 
 file_path = "../config.cfg"
 prop = ""
@@ -16,11 +17,11 @@ config = configparser.ConfigParser()
 config.read(file_path)
 try:
     mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="password",
+        host=config.get('mysql','host'),
+        user=config.get('mysql','user'),
+        password=config.get('mysql','password'),
         port=3306,
-        database="mms"
+        database=config.get('mysql','database')
     )
 except mysql.connector.Error as error:
     print("Database Connection Failed!")
@@ -649,6 +650,9 @@ def getProps(props):
     global prop
     prop = props
 
+@eel.expose
+def display(entityName,username):
+    displayEntity(entityName,username)
 
 page = "menu.html"
 

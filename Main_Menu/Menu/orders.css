@@ -43,32 +43,24 @@ body {
   cursor: pointer;
   color: #1aac83;
 }
-.home{
-  margin-top: 7vh;
-  display: grid;
-  grid-template-columns: 3fr 1fr;
-  background-size: cover;
-  color: black;
-  font-family: "Dongle", sans-serif;
-  font-weight: 400;
-  background-color: #f1f1f1;
-  width: 100%;
-  min-height: 93vh;
-  padding-top: 3vh;
-}
-.item-section{
+.orders-section{
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-family: "Dongle", sans-serif;
+  font-weight: 400;
+  background-color: #f1f1f1;
+  background-size:cover;
   width:100%;
+  min-height:100vh;
+  background-color: #f1f1f1;
 }
-
-.items {
+.orders {
   display: flex;
   flex-direction: column;
   margin-top: 20px;
   width:100%;
-  margin-top: 20px;
+  margin-top: 1vh;
 }
 
 .info {
@@ -98,51 +90,5 @@ body {
 #account{
 color: #1aac83;
 font-size:30px;
-}
-.filterOrders{
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 30px;
-  padding-top:9vh;
-  width:100%;
-}
-label {
-  font-weight: 400;
-}
-input {
-  padding: 10px;
-  margin-bottom: 20px;
-  width: 75%;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-button {
-  width:80px;
-  height:40px;
-  border: 0;
-  color: #fff;
-  padding: 5px 10px 5px 10px;
-  font-family: "Dongle";
-  font-size: 20px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.filter {
-  display: flex;
-  flex-direction: row;
-  align-items:center;
-  justify-content:center;
-  margin-left:200px;
-  background-color: #1aac83;
-  cursor: pointer;
-}
-.filter:hover {
-  background-color: #1db199;
+margin-top: 8vh;
 }

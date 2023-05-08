@@ -25,10 +25,18 @@
             <div class="items" id="items"></div>
         </div>
         <div class="filterItems">
+            <label style="font-size:50px;">Filter items:</label>
             <label>Items with Quantity less than:</label>
             <input type="number" placeholder="" id="filterAmount"/>
             <div class="submit">
                 <button class="filter" onclick="filter()">Filter</button>
+            </div>
+            <label style="font-size:50px;">Display Entities:</label>
+            <label>Entity name:</label>
+            <input type="text" placeholder="Entity name" id="entityName"/>
+            <div class="submit">
+                <button class="filter" onclick="display()">Display</button>
+            </div>
             </div>
                 <b id="message" class="message"></b>
                 <b id="result" class="result"></b>
@@ -116,7 +124,12 @@
             document.getElementById("items").innerHTML=itemInfo;
             },500);
         }
-
+        function display(){
+            var username= document.getElementById("account").innerHTML;
+            username=username.split(" ")[1];
+            var entityName= document.getElementById("entityName").value;
+            eel.display(entityName,username);
+        }
     </script>
 </body>
 </html>

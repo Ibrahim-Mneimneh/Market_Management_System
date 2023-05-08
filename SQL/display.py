@@ -24,11 +24,11 @@ def displayEntity(entity_input, username):
     config.read('../config.cfg')
     try:
         mydb = mysql.connector.connect(
-            host=config.get('mysql', 'host'),
-            user=config.get('mysql', 'user'),
-            password=config.get('mysql', 'password'),
+            host=config.get('mysql','host'),
+            user=config.get('mysql','user'),
+            password=config.get('mysql','password'),
             port=3306,
-            database=config.get('mysql', 'database')
+            database=config.get('mysql','database')
         )
     except mysql.connector.Error as error:
         print("Database Connection Failed!")
