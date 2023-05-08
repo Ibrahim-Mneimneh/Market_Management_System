@@ -249,7 +249,8 @@ def add_delivery_order(qrCode, quantity, empUsername, promoCode, firstname, last
     result = add_order(qrCode, quantity, empUsername, promoCode, True)
     if result == "Order created Successfully!":
         try:
-            query = "select distinct(last_insert_id()) from Item;"
+            # get the id of the most recent order added by this employee
+            query = "select max(orderId) from orders as ord join account as acc on ord.empId=acc.empId where username=\""+str(empUsername)+"\""+";"
             cursor = mydb.cursor()
             cursor.execute(query)
             order_id = cursor.fetchone()

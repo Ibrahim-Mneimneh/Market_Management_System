@@ -19,9 +19,13 @@
         }
         function handleError(text){
 
-            if(text==="Order created Successfully!"){
-                document.getElementById("message"),innerHTML="";
+            if(text==="Customer's order was added Successfully!"){
+                document.getElementById("message").innerHTML="";
                 document.getElementById("items").innerHTML="";
+                document.getElementById("firstname").value="";
+                document.getElementById("lastname").value="";
+                document.getElementById("phoneNumber").value="";
+                document.getElementById("address").innerHTML="";
                 document.getElementById("barcode").value="";
                 document.getElementById("quantity").value="";
                 document.getElementById("promoCode").value="";
@@ -30,10 +34,8 @@
                 quantities=[];
                 itemName=[];
                 itemPrice=[];
-                itemCount=0;
             }
             else{
-                itemCount=0;
                 document.getElementById("message").innerHTML=text;
             }
         }
@@ -48,7 +50,6 @@
         var quantities=[];
         var itemName=[];
         var itemPrice=[];
-        var itemCount=0;
         async function getDataPrice(priceData){
             await itemPrice.push(priceData);
         }

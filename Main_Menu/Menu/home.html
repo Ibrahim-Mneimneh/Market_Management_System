@@ -135,7 +135,7 @@
 
                 promoCode=document.getElementById("promoCode").value;
 
-                eel.add_order(barcodes,quantities,username,promoCode,true)(handleError);
+                eel.add_order(barcodes,quantities,username,promoCode,false)(handleError);
             }
             else{
                 document.getElementById("message").innerHTML="Please add an Item!";
