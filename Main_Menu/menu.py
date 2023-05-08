@@ -536,13 +536,13 @@ def filterSupplierIds(leftAmount):
                 itemSupplierId.append(result[0])
             else:
                 itemSupplierId.append("There is no current supplier!")
-        return itemSupplierId
+        return itemSupplierId,itemBarcodes
     except mysql.connector.IntegrityError as error:
         return "Failed to connect to the database."
 
 @eel.expose
 def filterSupplierName(leftAmount):
-    supplierIds = filterSupplierIds(leftAmount)
+    supplierIds,itemBarcodes = filterSupplierIds(leftAmount)
     itemSupplierName = []
     try:
         cursor = mydb.cursor()
@@ -562,13 +562,13 @@ def filterSupplierName(leftAmount):
 
 @eel.expose
 def filterSupplyPrice(leftAmount):
-    supplierIds = filterSupplierIds(leftAmount)
+    supplierIds,itemBarcodes = filterSupplierIds(leftAmount)
     itemSupplyPrice = []
     try:
         cursor = mydb.cursor()
-        for supplierId in supplierIds:
+        for supplierId,barcode in zip(supplierIds,itemBarcodes):
             if supplierId != "There is no current supplier!":
-                cursor.execute("SELECT price*supplyAmount from item_supplier where supplierId="+str(supplierId)+";")
+                cursor.execute("SELECT price*supplyAmount from item_supplier where supplierId="+str(supplierId)+" and barcode="+str(barcode)+";")
                 result = cursor.fetchone()
                 if result:
                     itemSupplyPrice.append(float(result[0]))
@@ -582,13 +582,13 @@ def filterSupplyPrice(leftAmount):
 
 @eel.expose
 def filterSupplyQuantity(leftAmount):
-    supplierIds = filterSupplierIds(leftAmount)
+    supplierIds,itemBarcodes = filterSupplierIds(leftAmount)
     itemSupplyQuantity = []
     try:
         cursor = mydb.cursor()
-        for supplierId in supplierIds:
+        for supplierId,barcode in zip(supplierIds,itemBarcodes):
             if supplierId != "There is no current supplier!":
-                cursor.execute("SELECT supplyAmount from item_supplier where supplierId="+str(supplierId)+";")
+                cursor.execute("SELECT supplyAmount from item_supplier where supplierId="+str(supplierId)+" and barcode="+str(barcode)+";")
                 result = cursor.fetchone()
                 if result:
                     itemSupplyQuantity.append(int(result[0]))
@@ -603,13 +603,13 @@ def filterSupplyQuantity(leftAmount):
 
 @eel.expose
 def filterSupplierNumber(leftAmount):
-    supplierIds = filterSupplierIds(leftAmount)
+    supplierIds,itemBarcodes = filterSupplierIds(leftAmount)
     itemSupplyQuantity = []
     try:
         cursor = mydb.cursor()
         for supplierId in supplierIds:
             if supplierId != "There is no current supplier!":
-                cursor.execute("SELECT phoneNumber from supplier where supplierId="+str(supplierId)+";")
+                cursor.execute("SELECT phoneNumber from supplier where SupplierId="+str(supplierId)+";")
                 result = cursor.fetchone()
                 if result:
                     itemSupplyQuantity.append(result[0])
