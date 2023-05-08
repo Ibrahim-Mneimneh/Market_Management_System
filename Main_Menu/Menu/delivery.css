@@ -65,7 +65,6 @@ body {
   margin-left: 8%;
   font-family: "Dongle";
   font-weight: 400;
-  gap:20px;
 }
 .barcode > span {
   font-size: 35px;
@@ -112,6 +111,7 @@ button {
 .finish {
   background-color: red;
   cursor: pointer;
+  margin-bottom:20px;
 }
 .add:hover {
   background-color: #1db187;
@@ -119,6 +119,7 @@ button {
 .finish:hover {
   background-color: rgb(255, 50, 50);
 }
+
 .item-section{
   display: flex;
   flex-direction: column;
@@ -126,6 +127,7 @@ button {
   margin-top: 20px;
   width:100%;
 }
+
 .items {
   display: flex;
   flex-direction: column;
@@ -187,14 +189,12 @@ input::-webkit-inner-spin-button {
 .message{
     display:flex;
     margin-left:50px;
-    margin-right:50px;
     font-size:25px;
     color:red;
 }
 .result{
     display:flex;
     margin-left:50px;
-    margin-right:50px;
     font-size:25px;
     color:#1aac83;
 }

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Market Management System (Home In Store Order)</title>
+        <link href="manager.css" rel="stylesheet">
+        <script type="text/javascript" src="/eel.js"></script>
+
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="./grocery-store .png" alt="image">
+            <span>Market Management System</span>
+        </div>
+        <div class="options">
+            <span style="color: #1aac83;">Staff</span>
+            <span onclick="routing('stocks.html')">Stock</span>
+            <span onclick="routing('orders.html')">Orders</span>
+        </div>
+    </div>
+    <div class="employee-section">
+        <b id="account"></b>
+        <div class="employees" id="employees">
+
+        </div>
+    </div>
+
+    <script>
+        eel.passProps()(receivedData);
+        var username="";
+        var empNames=[];
+        var empOrder=[];
+        var empSalaries=[];
+        EmpUnder();
+        setTimeout(()=>{
+            var employeeInfo="";
+            console.log(empNames);
+            console.log(empOrder);
+            empNames.map((name,index)=>{
+                employeeInfo=employeeInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Finished Orders: "+empOrder[index]+"</strong></p><p><strong>Salary: "+empSalaries[index]+" $</strong></p></div>"
+            })
+            document.getElementById("employees").innerHTML=employeeInfo;
+        },1000);
+
+        function routing(newPage){
+            window.close();
+            eel.routing(newPage);
+        }
+        function receivedData(props){
+            props= "Welcome "+props;
+            document.getElementById("account").innerHTML=props;
+        }
+        function setEmpOrder(orderNum){
+            empOrder= orderNum;
+        }
+        function setEmpNames(empFullNames){
+            empNames= empFullNames;
+        }
+        function setEmpSalaries(empSalary){
+            empSalaries=empSalary;
+        }
+        function EmpUnder(){
+            var username=""
+            setTimeout(()=>{
+                var username= document.getElementById("account").innerHTML;
+                username=username.split(" ")[1];
+                console.log(username);
+                eel.getEmpOrderNum(username)(setEmpOrder);
+                eel.getEmpNames(username)(setEmpNames);
+                eel.getEmpSalaries(username)(setEmpSalaries);
+            },500);
+        }
+
+    </script>
+</body>
+</html>

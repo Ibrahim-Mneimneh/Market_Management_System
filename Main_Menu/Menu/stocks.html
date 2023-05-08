@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Market Management System (Stocks)</title>
+        <link href="stocks.css" rel="stylesheet">
+        <script type="text/javascript" src="/eel.js"></script>
+
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="./grocery-store .png" alt="image">
+            <span>Market Management System</span>
+        </div>
+        <div class="options">
+            <span onclick="routing('manager.html')">Staff</span>
+            <span style="color: #1aac83;">Stock</span>
+            <span onclick="routing('orders.html')">Orders</span>
+        </div>
+    </div>
+    <div class="home">
+        <div class="item-section">
+            <b id="account"></b>
+            <div class="items" id="items"></div>
+        </div>
+        <div class="filterItems">
+            <label style="font-size:50px;">Filter items:</label>
+            <label>Items with Quantity less than:</label>
+            <input type="number" placeholder="" id="filterAmount"/>
+            <div class="submit">
+                <button class="filter" onclick="filter()">Filter</button>
+            </div>
+            <label style="font-size:50px;">Display Entities:</label>
+            <label>Entity name:</label>
+            <input type="text" placeholder="Entity name" id="entityName"/>
+            <div class="submit">
+                <button class="filter" onclick="display()">Display</button>
+            </div>
+            </div>
+                <b id="message" class="message"></b>
+                <b id="result" class="result"></b>
+        </div>
+    </div>
+
+    <script>
+        eel.passProps()(receivedData);
+        var itemNames=[];
+        var itemQuantities=[];
+        var itemPrices=[];
+        var supplierName=[];
+        var supplyQuantity=[];
+        var supplyPrice=[];
+        var supplierNumber=[];
+        getResult();
+        setTimeout(()=>{
+            var itemInfo="";
+            console.log(itemNames);
+            itemNames.map((name,index)=>{
+                itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price: "+itemPrices[index]+" $</strong></p></div>"
+            })
+            document.getElementById("items").innerHTML=itemInfo;
+        },500);
+
+        function routing(newPage){
+            window.close();
+            eel.routing(newPage);
+        }
+        function receivedData(props){
+            props= "Welcome "+props;
+            document.getElementById("account").innerHTML=props;
+        }
+        function setNames(names){
+            itemNames= names;
+        }
+        function setQuantities(quantities){
+            itemQuantities= quantities;
+        }
+        function setPrices(prices){
+            itemPrices=prices;
+        }
+        function getResult(){
+            eel.getItemNames()(setNames);
+            eel.getItemQuantity()(setQuantities);
+            eel.getItemPrice()(setPrices);
+        }
+        function setSupplierName(names){
+            supplierName=names;
+        }
+        function setSupplyQuantity(quantity){
+            supplyQuantity=quantity;
+        }
+        function setSupplyPrice(price){
+            supplyPrice=price;
+        }
+        function setSupplierNumber(number){
+            supplierNumber=number;
+        }
+        function filter(){
+            itemNames=[];
+            itemQuantities=[];
+            itemPrices=[];
+            var filterAmount= document.getElementById("filterAmount").value;
+            console.log(filterAmount)
+            eel.filterItemName(filterAmount)(setNames);
+            eel.filterItemQuantity(filterAmount)(setQuantities);
+            eel.filterItemPrice(filterAmount)(setPrices);
+            eel.filterSupplierName(filterAmount)(setSupplierName);
+            eel.filterSupplyPrice(filterAmount)(setSupplyPrice);
+            eel.filterSupplyQuantity(filterAmount)(setSupplyQuantity);
+            eel.filterSupplierNumber(filterAmount)(setSupplierNumber);
+            setTimeout(()=>{
+                var itemInfo="";
+                console.log(itemNames);
+                console.log(itemPrices);
+                itemNames.map((name,index)=>{
+                if(supplierName[index]==="There is no current supplier!"){
+                   itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price per unit: "+itemPrices[index]+" $</strong></p></div>"
+                }
+                else{
+                   itemInfo=itemInfo+"<div class='info' id='"+index+"'><h2>"+name+"</h2><p><strong>Left Amount: "+itemQuantities[index]+"</strong></p><p><strong>Price per unit: "+itemPrices[index]+" $</strong></p><p><strong>Suggest:</strong></p><p><strong>Supplier Name: "+supplierName[index]+" </strong></p><p><strong>Supplier's Phone Number: "+supplierNumber[index]+" </strong></p><p><strong>Supply Quantity: "+supplyQuantity[index]+" </strong></p><p><strong>Supply Price: "+supplyPrice[index]+" $</strong></p></div>"
+                }
+                })
+            document.getElementById("items").innerHTML=itemInfo;
+            },500);
+        }
+        function display(){
+            var username= document.getElementById("account").innerHTML;
+            username=username.split(" ")[1];
+            var entityName= document.getElementById("entityName").value;
+            eel.display(entityName,username);
+        }
+    </script>
+</body>
+</html>

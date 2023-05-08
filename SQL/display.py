@@ -1,130 +1,308 @@
+import os
+import subprocess
 import mysql.connector
 from tkinter import *
 from tkinter import ttk
 import customtkinter
 import csv
 import configparser
+from tkinter import filedialog
+import smtplib
+import ssl
+from email.message import EmailMessage
 
-entity = input("Entity: ")
+file_path = "../config.cfg"
 
-
-config = configparser.ConfigParser()
-config.read('../config.cfg')
-try:
-    mydb = mysql.connector.connect(
-        host=config.get('mysql', 'host'),
-        user=config.get('mysql', 'user'),
-        password=config.get('mysql', 'password'),
-        port=3306,
-        database=config.get('mysql', 'database')
-    )
-except mysql.connector.Error as error:
-    print("Database Connection Failed!")
-    quit()
-    mydb.close()
-
-# Create cursor
-mycursor = mydb.cursor()
-
-# Create a Tkinter window
-root = customtkinter.CTk()
-
-customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
-customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
-
-# # Maximize the window
-# root.state('zoomed')
-
-# Set title
-root.title(entity + " Table View")
+if not os.path.exists(file_path):
+    subprocess.run(['python', '../SQL/SQLprompt.py'])
 
 
-def export_to_csv():
+def displayEntity(entity_input, username):
+    entity = entity_input
+
+    config = configparser.ConfigParser()
+    config.read('../config.cfg')
+    try:
+        mydb = mysql.connector.connect(
+            host=config.get('mysql','host'),
+            user=config.get('mysql','user'),
+            password=config.get('mysql','password'),
+            port=3306,
+            database=config.get('mysql','database')
+        )
+    except mysql.connector.Error as error:
+        print("Database Connection Failed!")
+        quit()
+        mydb.close()
+
     # Create cursor
     mycursor = mydb.cursor()
 
-    # Fetch data from the table
-    mycursor.execute("SELECT * FROM " + entity)
-    data = mycursor.fetchall()
+    # Create a Tkinter window
+    root = customtkinter.CTk()
 
-    # Get the column names
-    mycursor.execute("SHOW COLUMNS FROM " + entity)
-    columns = [col[0] for col in mycursor.fetchall()]
+    customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
+    customtkinter.set_default_color_theme("green")  # Themes: blue (default), dark-blue, green
 
-    # Open a CSV file for writing
-    with open(entity + '.csv', mode='w', newline='') as csv_file:
-        # Create a CSV writer object
-        writer = csv.writer(csv_file)
+    # # Maximize the window
+    # root.state('zoomed')
 
-        # Write the column names to the CSV file
-        writer.writerow(columns)
+    # Set title
+    root.title(entity + " Table View")
 
-        # Write the data to the CSV file
-        for row in data:
-            writer.writerow(row)
+    def export_to_csv():
+        # Fetch data from the table
+        mycursor.execute("SELECT * FROM " + entity)
+        data = mycursor.fetchall()
 
-    # Close the CSV file
-    csv_file.close()
+        # Get the column names
+        mycursor.execute("SHOW COLUMNS FROM " + entity)
+        columns = [col[0] for col in mycursor.fetchall()]
 
-def remove_row(tree):
-    # Get the selected row(s)
-    selected_rows = tree.selection()
+        browse_path = filedialog.asksaveasfilename(defaultextension=".csv", initialfile=entity,
+                                                   filetypes=[("CSV files", "*.csv")])
 
-    # Loop through each selected row and print the first column value
-    for row in selected_rows:
-        # TODO Remove query
-        values = tree.item(row, 'values')
-        print(values[0])
+        if not browse_path == '':
+            # Open a CSV file for writing
+            with open(browse_path, mode='w', newline='') as csv_file:
+                # Create a CSV writer object
+                writer = csv.writer(csv_file)
 
-# Create a Frame to hold the buttons
-button_frame = customtkinter.CTkFrame(root)
-button_frame.pack(side=TOP)
+                # Write the column names to the CSV file
+                writer.writerow(columns)
+
+                # Write the data to the CSV file
+                for row in data:
+                    writer.writerow(row)
+
+            # Close the CSV file
+            csv_file.close()
+
+    def export_to_csv_email():
+        # Fetch data from the table
+        mycursor.execute("SELECT * FROM " + entity)
+        data = mycursor.fetchall()
+        # Get the column names
+        mycursor.execute("SHOW COLUMNS FROM " + entity)
+        columns = [col[0] for col in mycursor.fetchall()]
+        # Define a file path and name to save the CSV file
+        browse_path = filedialog.asksaveasfilename(defaultextension=".csv", initialfile=entity,
+                                                   filetypes=[("CSV files", "*.csv")])
+        # Export data to CSV
+        if not browse_path == '':
+            # Open a CSV file for writing
+            with open(browse_path, mode='w', newline='') as csv_file:
+                # Create a CSV writer object
+                writer = csv.writer(csv_file)
+                # Write the column names to the CSV file
+                writer.writerow(columns)
+                # Write the data to the CSV file
+                for row in data:
+                    writer.writerow(row)
+            # Close the CSV file
+            csv_file.close()
+
+            if not config.has_section('email'):
+                print("Email is not set in config.cfg!")
+                return
+
+            # Define the email sender and receiver
+            email_sender = config.get('email', 'email_sender')
+            email_password = config.get('email', 'email_password')
+            query = f"SELECT email FROM Account WHERE username='{username}'"
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            row = cursor.fetchone()
+            email_receiver = row[0]
+            # Set the subject and body of the email
+            subject = entity + ' CSV Export'
+            body = "As requested, here is the CSV of the " + entity + " entity you exported."
+            # Define the file path and name to attach to the email
+            attachment_file_path = os.path.join(os.path.dirname(browse_path), entity + '.csv')
+            # Set up the email message with attachment
+            em = EmailMessage()
+            em['From'] = email_sender
+            em['To'] = email_receiver
+            em['Subject'] = subject
+            em.set_content(body)
+            # Open and attach the CSV file to the email
+            with open(attachment_file_path, 'rb') as file:
+                file_data = file.read()
+                em.add_attachment(file_data, maintype='application', subtype='octet-stream', filename=entity + '.csv')
+            # Send the email
+            # Add SSL (layer of security)
+            context = ssl.create_default_context()
+            # Log in and send the email
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+                smtp.login(email_sender, email_password)
+                smtp.sendmail(email_sender, email_receiver, em.as_string())
+
+            print("Email Sent!")
+
+    def remove_row(tree):
+        # Get the selected row(s)
+        selected_rows = tree.selection()
+
+        # Loop through each selected row and print the first column value
+        for row in selected_rows:
+            # TODO Remove query
+            values = tree.item(row, 'values')
+            print(values[0])
+
+            if entity == "Account":
+                query = "SELECT empid FROM Account WHERE username = \"" + values[0] + "\""
+                mycursor.execute(query)
+                result = mycursor.fetchone()
+                empid = result[0] if result else ''
+
+                # Delete the row from the database
+                query = "DELETE FROM Account WHERE username = \"" + values[0] + "\""
+                mycursor.execute(query)
+                query = "DELETE FROM Employee WHERE EmpId = " + str(empid)
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
+            if entity == "Employee":
+                query = "SELECT username FROM Account WHERE empId = \"" + values[0] + "\""
+                mycursor.execute(query)
+                result = mycursor.fetchone()
+                username = result[0] if result else ''
+
+                # Delete the row from the database
+                query = "DELETE FROM Account WHERE username = \"" + str(username) + "\""
+                mycursor.execute(query)
+                query = "DELETE FROM Employee WHERE EmpId = " + values[0]
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
+            if entity == "Supplier":
+                query = "DELETE FROM Supplier WHERE SupplierId = " + values[0]
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
+            if entity == "Item_Supplier":
+                query = "DELETE FROM Item_Supplier WHERE barcode = " + values[0] + " and supplierId = " + values[1]
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
+            if entity == "Item":
+                # Check if entry exists before deleting
+                barcode = values[0]
+                query = "SELECT * FROM Item_Supplier WHERE barcode = %s"
+                mycursor.execute(query, (barcode,))
+                result = mycursor.fetchone()
+                if result:
+                    # Entry exists, execute deletion query
+                    query = "DELETE FROM Item_Supplier WHERE barcode = %s"
+                    mycursor.execute(query, (barcode,))
+                    print("Entry successfully deleted from database.")
+                else:
+                    # Entry doesn't exist, print error message
+                    print(f"No entry found in database with barcode {barcode}.")
+
+                query = "DELETE FROM Item WHERE Barcode = " + barcode
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
+            if entity == "Promocode":
+                query = "DELETE FROM Promocode WHERE Promocode = \"" + values[0] + "\""
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
+            if entity == "Customer":
+                query = "DELETE FROM Customer WHERE CustomerId = " + values[0]
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
+
+            if entity == "Orders":
+                query = "DELETE FROM item_order WHERE OrderId = " + values[0]
+                mycursor.execute(query)
+
+                query = "DELETE FROM Orders WHERE OrderId = " + values[0]
+                mycursor.execute(query)
+                mydb.commit()
+
+                tree.delete(row)
 
 
+    # Create a Frame to hold the buttons
+    button_frame = customtkinter.CTkFrame(root)
+    button_frame.pack(side=TOP)
 
-# Create a button for exporting the table to a CSV file
-pdf_button = customtkinter.CTkButton(button_frame, text="Export to CSV", command=export_to_csv)
-pdf_button.pack(side=LEFT, padx=10)
+    # Create a button for exporting the table to a CSV file
+    pdf_button = customtkinter.CTkButton(button_frame, text="Export to CSV", command=export_to_csv)
+    pdf_button.pack(side=LEFT, padx=10)
 
-# Create a Frame to hold the Treeview widget and scrollbar
-frame = customtkinter.CTkFrame(root)
-frame.pack(pady=10, padx=10, fill=BOTH, expand=True)
+    # Create a button for exporting the table to a CSV file
+    pdf_button = customtkinter.CTkButton(button_frame, text="Export to CSV and Send Email", command=export_to_csv_email)
+    pdf_button.pack(side=LEFT, padx=10)
 
-# Create a Treeview widget to display the data
-tree = ttk.Treeview(frame, show='headings')
-tree.pack(side=LEFT, fill=BOTH, expand=True)
+    # Create a button for removing selected row(s)
+    remove_button = customtkinter.CTkButton(button_frame, text="Remove Row", command=lambda: remove_row(tree))
+    remove_button.pack(side=LEFT, padx=10)
 
-# Create a button for removing selected row(s)
-remove_button = customtkinter.CTkButton(button_frame, text="Remove Row", command=lambda: remove_row(tree))
-remove_button.pack(side=LEFT, padx=10)
+    mycursor.execute("SELECT COUNT(*) FROM " + entity)
+    count = mycursor.fetchone()[0]
 
-# Create a scrollbar
-# scrollbar = customtkinter.CTkScrollbar(master = frame, orientation="vertical", command=tree.yview)
-scrollbar = ttk.Scrollbar(frame, orient=VERTICAL, command=tree.yview)
-scrollbar.pack(side=RIGHT, fill=Y)
-tree.configure(yscrollcommand=scrollbar.set)
+    # Create a label widget to display the number of rows
+    count_label = customtkinter.CTkLabel(master=root, text=f"Records count: {count}")
+    count_label.pack()
 
-# Get all data from the table
-mycursor.execute("SELECT * FROM " + entity)
+    # Create a Frame to hold the Treeview widget and scrollbar
+    frame = customtkinter.CTkFrame(root)
+    frame.pack(padx=10, fill=BOTH, expand=True)
 
-# Fetch all data
-data = mycursor.fetchall()
+    # Create a Treeview widget to display the data
+    tree = ttk.Treeview(frame, show='headings')
+    tree.pack(side=LEFT, fill=BOTH, expand=True)
 
-# Define columns
-columns = [i[0] for i in mycursor.description]
-tree["columns"] = columns
+    # Create a scrollbar
+    # scrollbar = customtkinter.CTkScrollbar(master = frame, orientation="vertical", command=tree.yview)
+    scrollbar = ttk.Scrollbar(frame, orient=VERTICAL, command=tree.yview)
+    scrollbar.pack(side=RIGHT, fill=Y)
+    tree.configure(yscrollcommand=scrollbar.set)
 
-# Set column headings
-for col in columns:
-    tree.column(col, width=100, anchor=CENTER)
-    tree.heading(col, text=col, anchor=CENTER)
+    try:
+        # Get all data from the table
+        mycursor.execute("SELECT * FROM " + entity)
+        # Fetch all data
+        data = mycursor.fetchall()
+    except:
+        print("Table not found.")
+        quit()
 
-# Insert data into the Treeview widget
-for row in data:
-    tree.insert("", END, values=row)
+    # Define columns
+    columns = [i[0] for i in mycursor.description]
+    tree["columns"] = columns
 
-# Execute the Tkinter event loop
-root.mainloop()
+    # Set column headings
+    for col in columns:
+        tree.column(col, width=100, anchor=CENTER)
+        tree.heading(col, text=col, anchor=CENTER)
 
-# Close the database connection
-mydb.close()
+    # Insert data into the Treeview widget
+    for row in data:
+        tree.insert("", END, values=row)
+
+    # Execute the Tkinter event loop
+    root.mainloop()
+
+    # Close the database connection
+    mydb.close()
+
+
+#displayEntity("Orders", 'zouheirn')

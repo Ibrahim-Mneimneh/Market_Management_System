@@ -20,20 +20,19 @@
         document.getElementById('message').innerHTML = error;
         var username_email =document.getElementById('username_email');
         var password =document.getElementById('password');
-        function login(){
-            error =eel.login()
-        }
-        function signup(){
-            eel.signup()
-        }
+
         function routing(newPage){
         window.close()
-        eel.routing(newPage)
+        eel.routing(newPage);
         }
+
         function handleError(text){
             document.getElementById("message").innerHTML=text;
             if(text==="Logging In."){
-            routing("home.html");
+                routing("home.html");
+            }
+            if(text==="Logging Manager In."){
+                routing("manager.html");
             }
         }
         function submit(){

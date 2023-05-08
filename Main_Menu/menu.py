@@ -4,21 +4,24 @@ import subprocess
 import eel
 import mysql.connector
 import hashlib
+from win32api import GetSystemMetrics
+from datetime import date
+from SQL.display import displayEntity
 
 file_path = "../config.cfg"
-
+prop = ""
 if not os.path.exists(file_path):
-    subprocess.run(['python', '../SQL/getSQLpassword.py'])
+    subprocess.run(['python', '../SQL/SQLprompt.py'])
 
 config = configparser.ConfigParser()
 config.read(file_path)
 try:
     mydb = mysql.connector.connect(
-        host=config.get('mysql', 'host'),
-        user=config.get('mysql', 'user'),
-        password=config.get('mysql', 'password'),
+        host=config.get('mysql','host'),
+        user=config.get('mysql','user'),
+        password=config.get('mysql','password'),
         port=3306,
-        database=config.get('mysql', 'database')
+        database=config.get('mysql','database')
     )
 except mysql.connector.Error as error:
     print("Database Connection Failed!")
@@ -77,7 +80,7 @@ def signup(firstname, lastname, email, username, phonenumber, password):
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
-        print(cursor.rowcount, "rows were added to the database!")
+        print("Employee " + firstname + " " + lastname + " was added.")
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
         return "PhoneNumber is already in use"
@@ -89,7 +92,7 @@ def signup(firstname, lastname, email, username, phonenumber, password):
         cursor = mydb.cursor()
         cursor.execute(query)
         mydb.commit()
-        print(cursor.rowcount, "rows were added to the database!")
+        print(username + " Account was created Successfully!")
     except mysql.connector.IntegrityError as error:
         print("Couldn't insert the record to the database, an integrity constraint failed!")
         return "Username or email may be already in use."
@@ -100,8 +103,8 @@ def signup(firstname, lastname, email, username, phonenumber, password):
 def login(username_email, password):
     mycursor = mydb.cursor()
 
-    # Check if the email has ".com"
-    if ".com" in username_email:
+    # Check if the email has "@"
+    if '@' in username_email and '.' in username_email.split('@')[1]:
         # Check if the email is found in the Account table
         mycursor.execute("SELECT * FROM Account WHERE email = %s", (username_email,))
     else:
@@ -109,7 +112,6 @@ def login(username_email, password):
         mycursor.execute("SELECT * FROM Account WHERE username = %s", (username_email,))
 
     account = mycursor.fetchone()
-
     # If the account exists
     if account:
         # Encrypt the password
@@ -120,6 +122,15 @@ def login(username_email, password):
 
         # Check if the passwords match
         if hashed_password == stored_password:
+
+            global prop
+            prop = account[0]
+            print(account[0] + " just logged in!")
+            # check if the employee is an admin
+            is_manager = account[3]
+            if is_manager:
+                print("Manager " + account[0] + " just logged in!")
+                return "Logging Manager In."
             return "Logging In."
         else:
             return "Incorrect Username/Email or Password."
@@ -128,11 +139,579 @@ def login(username_email, password):
 
 
 @eel.expose
+def add_order(qrCode, quantity, empUsername, promoCode, isOnline):
+    if len(qrCode) == 0:
+        return "Please add an item."
+    # check if all items are present with requested quantities
+    for item, itemQuantity in zip(qrCode, quantity):
+        mycursor = mydb.cursor()
+        mycursor.execute("SELECT EXISTS(SELECT barCode FROM Item WHERE barCode =" + item + ");")
+        result = mycursor.fetchone()[0]
+
+        if result != 1:
+            return "The item '" + item + "' doesn't exist."
+
+        mycursor = mydb.cursor()
+        query = "SELECT leftAmount FROM Item WHERE barCode = " + item + ";"
+        mycursor.execute(query)
+        result = mycursor.fetchone()[0]
+
+        if result < int(itemQuantity) or int(itemQuantity) == 0:
+            return "Available amount of '" + str(item) + "' is " + str(result)
+
+    if promoCode:
+        # check if barcode is not used before and is real
+        try:
+            cursor = mydb.cursor()
+            cursor.execute("Select promoCode from promoCode where promoCode=\"" + str(promoCode) + "\";")
+            isPromoCode = cursor.fetchone()
+            if isPromoCode:
+                print("Barcode is Available!")
+            else:
+                return "Barcode doesn't exist."
+
+        except  mysql.connector.IntegrityError as error:
+            print("Failed to connect to database!")
+
+    # Create the order, we need to grab the employee's ID first
+    currentDate = str(date.today())
+    try:
+        query = "Select e.empId from Employee as e join Account as acc on e.empId=acc.empId where username=\"" + empUsername + "\";"
+        cursor = mydb.cursor()
+        cursor.execute(query)
+        empId = cursor.fetchone()
+        print("EmpId: " + str(empId[0]))
+        if promoCode:
+            query = "Insert into orders(date,price,isOnline,EmpId,promoCode) values(\"" + currentDate + "\",1," + str(
+                isOnline) + "," + str(
+                empId[0]) + ",\"" + str(promoCode) + "\");"
+            # add promo code
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+        else:
+            query = "Insert into orders(date,price,isOnline,EmpId) values(\"" + currentDate + "\",1," + str(
+                isOnline) + "," + str(
+                empId[0]) + ");"
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+
+        print("New Order created Successfully!!")
+    except mysql.connector.IntegrityError as error:
+        print("Couldn't place Order! 0")
+
+    # Grab the order id to insert it on each Order-Item relation
+    query = "select distinct(last_insert_id()) from Item;"
+    cursor = mydb.cursor()
+    cursor.execute(query)
+    order_id = cursor.fetchone()
+    print(str(order_id[0]))
+    # Add the items into the order
+    for item, itemQuantity in zip(qrCode, quantity):
+        try:
+            query = "Insert into item_Order(OrderId,barCode,quantity) values(" + str(
+                order_id[0]) + "," + item + "," + str(itemQuantity) + ");"
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+            print("Item of QRcode " + item + " was added successfully!!")
+        except mysql.connector.IntegrityError as error:
+            return "Couldn't place Order!"
+        # Update the quantity of the item
+        try:
+            query = "Update item set leftAmount=leftAmount-" + str(itemQuantity) + " where barCode=" + item
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+            print("Updated " + item + " item's quantity successfully!!")
+        except mysql.connector.IntegrityError as error:
+            print("Couldn't insert the record to the database, an integrity constraint failed!")
+    # After Updating the quantity of each product we update the price of the order
+    try:
+        query = "Update orders set price=(select sum(i.Price*io.quantity) from item as i join item_order as io on i.Barcode=io.barcode where orderId=" + str(
+            order_id[0]) + ") where orderId=" + str(order_id[0]) + ";"
+        cursor = mydb.cursor()
+        cursor.execute(query)
+        mydb.commit()
+        if promoCode:
+            query = "Update orders set price=price-(price*(select discount from PromoCode where promoCode=\"" + str(promoCode) + "\")/100) where orderId=" + str(order_id[0]) + ";"
+            cursor.execute(query)
+            mydb.commit()
+        print("Order number " + str(order_id[0]) + " price was updated successfully!!")
+        return "Order created Successfully!"
+    except mysql.connector.IntegrityError as error:
+        print("Couldn't insert the record to the database, an integrity constraint failed!")
+
+
+@eel.expose
+def add_delivery_order(qrCode, quantity, empUsername, promoCode, firstname, lastname, phoneNumber, address):
+    # use add order to add an order
+    result = add_order(qrCode, quantity, empUsername, promoCode, True)
+    if result == "Order created Successfully!":
+        try:
+            # get the id of the most recent order added by this employee
+            query = "select max(orderId) from orders as ord join account as acc on ord.empId=acc.empId where username=\""+str(empUsername)+"\""+";"
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            order_id = cursor.fetchone()
+        except mysql.connector.IntegrityError as error:
+            print("Couldn't insert the record to the database, an integrity constraint failed!")
+            return "Failed to link customer to his order."
+        try:
+            query = "Insert into customer(firstname,lastname,phoneNumber,address,orderId) values(\"" + firstname + "\",\"" + lastname + \
+                    "\",\"" + phoneNumber + "\",\"" + address + "\"," + str(order_id[0]) + ")"
+            cursor = mydb.cursor()
+            cursor.execute(query)
+            mydb.commit()
+            print("Customer " + firstname + " " + lastname + "'s order was added Successfully!")
+            return "Customer's order was added Successfully!"
+        except mysql.connector.IntegrityError as error:
+            print("Couldn't insert the record to the database, an integrity constraint failed!")
+    else:
+        return "Order failed! Please try again!"
+
+
+def price(barcode):
+    try:
+        query = "select price from Item where barcode=" + barcode
+        cursor = mydb.cursor()
+        cursor.execute(query)
+        price = cursor.fetchone()
+        if price:
+            print(price[0])
+            return str(price[0]) + ""
+        else:
+            print("Price not found!")
+            return "Price not found!"
+    except mysql.connector.IntegrityError as error:
+        print("Couldn't insert the record to the database, an integrity constraint failed!")
+        return "Item not found!"
+
+
+def name(barcode):
+    try:
+        query = "select name from Item where barcode=" + barcode
+        cursor = mydb.cursor()
+        cursor.execute(query)
+        name = cursor.fetchone()
+        if name:
+            print(name[0])
+            return name[0] + ""
+        else:
+            print("Item not found!")
+            return "Item not found!"
+    except mysql.connector.IntegrityError as error:
+        print("Couldn't insert the record to the database, an integrity constraint failed!")
+        return "Item not found!"
+
+
+# takes a manager's username and returns an array of empIds
+def getEmpUnder(username):
+    try:
+        mycursor = mydb.cursor()
+        mycursor.execute("SELECT EmpId FROM account WHERE username = \"" + str(username) + "\"")
+        manId = mycursor.fetchone()[0]
+        # Check if manId is a manager
+        mycursor.execute("SELECT EmpId FROM Employee WHERE EmpId =\"" + str(manId) + "\";")
+        result = mycursor.fetchone()
+    except:
+        return "manId is not a manger."
+    if result is None:
+        return "manId is not a manager."
+
+    # Get the employee ids under the manager
+    mycursor.execute("SELECT EmpId FROM Employee WHERE managerId = %s", (manId,))
+    result = mycursor.fetchall()
+    empIds = [row[0] for row in result]
+    return empIds
+
+
+@eel.expose
+def getEmpOrderNum(username):
+    empIds = getEmpUnder(username)
+    if empIds == "manId is not a manager.":
+        return "manId is not a manager."
+    empOrderNum = []
+    try:
+        cursor = mydb.cursor()
+        for empId in empIds:
+            query = "SELECT count(*) FROM orders WHERE EmpId=" + str(empId) + ";"
+            cursor.execute(query)
+            empOrderNum.append(cursor.fetchone()[0])
+
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+    if empOrderNum:
+        return empOrderNum
+    else:
+        return False
+
+
+@eel.expose
+def getEmpNames(username):
+    empIds = getEmpUnder(username)
+    if empIds == "manId is not a manager.":
+        return "manId is not a manager."
+    fullnames = []
+    try:
+        cursor = mydb.cursor()
+        for empId in empIds:
+            cursor.execute("SELECT Firstname, Lastname FROM Employee WHERE EmpId=" + str(empId) + ";")
+            result = cursor.fetchone()
+            fullnames.append(result[0] + " " + result[1])
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+    if fullnames:
+        return fullnames
+    else:
+        return False
+
+
+@eel.expose
+def getEmpSalaries(username):
+    empIds = getEmpUnder(username)
+    if empIds == "manId is not a manager.":
+        return "manId is not a manager."
+    salaries = []
+    try:
+        cursor = mydb.cursor()
+        for empId in empIds:
+            cursor.execute("SELECT salary FROM Employee WHERE EmpId=" + str(empId) + ";")
+            result = cursor.fetchone()
+            salaries.append(int(result[0]))
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+    if salaries:
+        return salaries
+    else:
+        return False
+
+
+def promote(username, empId):
+    cursor = mydb.cursor()
+    query = "select isMan from Account where empId = " + str(empId) + ";"
+    cursor.execute(query)
+    result = cursor.fetchone()
+
+    if result is not None and result[0] == 1:
+        # empId is already a manager
+        return str(empId) + " is already a manager"
+
+    query = "UPDATE Account SET isMan = 1 WHERE empId = " + str(empId) + ";"
+    cursor.execute(query)
+
+    empIds = getEmpUnder(username)
+    for id in empIds:
+        query = "UPDATE Employee SET managerId = %s WHERE EmpId = %s"
+        param = (str(empId), str(id))
+        cursor.execute(query, param)
+
+    query = "update Employee set managerId = (select empId from Account where username = \"" + username + "\") where EmpId = " + str(
+        empId) + ";"
+    cursor.execute(query)
+
+    mydb.commit()
+    cursor.close()
+    return str(empId) + " is now a manager!"
+
+def getItemBarcode():
+    barcodes = []
+    try:
+        cursor = mydb.cursor()
+        cursor.execute("SELECT barcode FROM item order by name ;")
+        result = cursor.fetchall()
+        barcodes = [row[0] for row in result]
+        return barcodes
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+
+@eel.expose
+def getItemNames():
+    itemBarcodes= getItemBarcode()
+    itemNames = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT name from item where barcode=\""+str(item)+"\";")
+            result = cursor.fetchone()
+            itemNames.append(result[0])
+        return itemNames
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+
+@eel.expose
+def getItemPrice():
+    itemBarcodes= getItemBarcode()
+    itemPrices = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT price from item where barcode=\""+str(item)+"\";")
+            result = cursor.fetchone()
+            itemPrices.append(float(result[0]))
+        return itemPrices
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+@eel.expose
+def getItemQuantity():
+    itemBarcodes= getItemBarcode()
+    itemQunatities = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT leftAmount from item where barcode=\""+str(item)+"\";")
+            result = cursor.fetchone()[0]
+            itemQunatities.append(int(result))
+        return itemQunatities
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+def filterBarcode(leftAmount):
+    barcodes = []
+    try:
+        cursor = mydb.cursor()
+        cursor.execute("SELECT barcode FROM item where leftAmount<="+str(leftAmount)+" order by leftAmount;")
+        result = cursor.fetchall()
+        barcodes = [row[0] for row in result]
+        return barcodes
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+
+@eel.expose
+def filterItemName(leftAmount):
+    itemBarcodes= filterBarcode(leftAmount)
+    itemNames = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT name from item where barcode=\""+str(item)+"\";")
+            result = cursor.fetchone()[0]
+            itemNames.append(result)
+        return itemNames
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+@eel.expose
+def filterItemQuantity(leftAmount):
+    itemBarcodes= filterBarcode(leftAmount)
+    itemQunatities = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT leftAmount from item where barcode=\""+str(item)+"\";")
+            result = cursor.fetchone()[0]
+            itemQunatities.append(int(result))
+        return itemQunatities
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+@eel.expose
+def filterItemPrice(leftAmount):
+    itemBarcodes= filterBarcode(leftAmount)
+    itemPrices = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT price from item where barcode=\""+str(item)+"\";")
+            result = cursor.fetchone()[0]
+            itemPrices.append(float(result))
+        return itemPrices
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+
+def filterSupplierIds(leftAmount):
+    itemBarcodes = filterBarcode(leftAmount)
+    itemSupplierId = []
+    try:
+        cursor = mydb.cursor()
+        for item in itemBarcodes:
+            cursor.execute("SELECT supplierId from Item_supplier where barcode=\"" + str(item) + "\" and price= (select min(price) from Item_Supplier where barcode=\"" + str(item) + "\");")
+            result = cursor.fetchone()
+            if result:
+                itemSupplierId.append(result[0])
+            else:
+                itemSupplierId.append("There is no current supplier!")
+        return itemSupplierId,itemBarcodes
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+@eel.expose
+def filterSupplierName(leftAmount):
+    supplierIds,itemBarcodes = filterSupplierIds(leftAmount)
+    itemSupplierName = []
+    try:
+        cursor = mydb.cursor()
+        for supplierId in supplierIds:
+            if supplierId != "There is no current supplier!":
+                cursor.execute("SELECT name from supplier where supplierId=" + str(supplierId) + " ;")
+                result = cursor.fetchone()
+                if result:
+                    itemSupplierName.append(result[0])
+                else:
+                    itemSupplierName.append("There is no current supplier!")
+            else:
+                itemSupplierName.append("There is no current supplier!")
+        return itemSupplierName
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+@eel.expose
+def filterSupplyPrice(leftAmount):
+    supplierIds,itemBarcodes = filterSupplierIds(leftAmount)
+    itemSupplyPrice = []
+    try:
+        cursor = mydb.cursor()
+        for supplierId,barcode in zip(supplierIds,itemBarcodes):
+            if supplierId != "There is no current supplier!":
+                cursor.execute("SELECT price*supplyAmount from item_supplier where supplierId="+str(supplierId)+" and barcode="+str(barcode)+";")
+                result = cursor.fetchone()
+                if result:
+                    itemSupplyPrice.append(float(result[0]))
+                else:
+                    itemSupplyPrice.append("There is no current supplier!")
+            else:
+                itemSupplyPrice.append("There is no current supplier!")
+        return itemSupplyPrice
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+@eel.expose
+def filterSupplyQuantity(leftAmount):
+    supplierIds,itemBarcodes = filterSupplierIds(leftAmount)
+    itemSupplyQuantity = []
+    try:
+        cursor = mydb.cursor()
+        for supplierId,barcode in zip(supplierIds,itemBarcodes):
+            if supplierId != "There is no current supplier!":
+                cursor.execute("SELECT supplyAmount from item_supplier where supplierId="+str(supplierId)+" and barcode="+str(barcode)+";")
+                result = cursor.fetchone()
+                if result:
+                    itemSupplyQuantity.append(int(result[0]))
+                else:
+                    itemSupplyQuantity.append("There is no current supplier!")
+            else:
+                itemSupplyQuantity.append("There is no current supplier!")
+        return itemSupplyQuantity
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+
+@eel.expose
+def filterSupplierNumber(leftAmount):
+    supplierIds,itemBarcodes = filterSupplierIds(leftAmount)
+    itemSupplyQuantity = []
+    try:
+        cursor = mydb.cursor()
+        for supplierId in supplierIds:
+            if supplierId != "There is no current supplier!":
+                cursor.execute("SELECT phoneNumber from supplier where SupplierId="+str(supplierId)+";")
+                result = cursor.fetchone()
+                if result:
+                    itemSupplyQuantity.append(result[0])
+                else:
+                    itemSupplyQuantity.append("There is no current supplier!")
+            else:
+                itemSupplyQuantity.append("There is no current supplier!")
+        return itemSupplyQuantity
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+def getOrderNumber():
+    orderNumber = []
+    try:
+        cursor = mydb.cursor()
+        cursor.execute("SELECT orderId FROM orders order by date;")
+        result = cursor.fetchall()
+        orderNumber = [row[0] for row in result]
+        return orderNumber
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+@eel.expose
+def getOrderNumbers():
+    orderNumber = []
+    try:
+        cursor = mydb.cursor()
+        cursor.execute("SELECT orderId FROM orders order by date;")
+        result = cursor.fetchall()
+        orderNumber = [row[0] for row in result]
+        return orderNumber
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+@eel.expose
+def getOrderPrice():
+    orderIds=getOrderNumber()
+    orderPrices=[]
+    try:
+        cursor = mydb.cursor()
+        for order in orderIds:
+            cursor.execute("SELECT price from orders where orderId="+str(order)+";")
+            result = cursor.fetchone()[0]
+            orderPrices.append(float(result))
+        print(orderPrices)
+        return orderPrices
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+
+
+@eel.expose
+def getCustomerNames():
+    orderIds=getOrderNumber()
+    customerNames=[]
+    try:
+        cursor = mydb.cursor()
+        for order in orderIds:
+            cursor.execute("SELECT isOnline from orders where orderId="+str(order)+";")
+            result = cursor.fetchone()[0]
+            if result==1 :
+                cursor.execute("SELECT firstname,lastname from customer where orderId=" + str(order) + ";")
+                names = cursor.fetchone()
+                customerNames.append(names[0] + " " + names[1])
+            else:
+                customerNames.append("Order has no customer!")
+        print(customerNames)
+        return customerNames
+    except mysql.connector.IntegrityError as error:
+        return "Failed to connect to the database."
+@eel.expose
+def getName(barcode):
+    item_name = name(barcode)
+    return item_name
+
+
+@eel.expose
+def getPrice(barcode):
+    item_price = price(barcode)
+    return item_price
+
+
+@eel.expose
+def passProps():
+    return prop
+
+
+@eel.expose
 def routing(newpage):
     eel.show(newpage)
 
 
-page = "menu.html"
+@eel.expose
+def getProps(props):
+    global prop
+    prop = props
+
+@eel.expose
+def display(entityName,username):
+    displayEntity(entityName,username)
+
+page = "orders.html"
 
 eel.init("Menu")
-eel.start(page)
+eel.start(page, size=(GetSystemMetrics(0), GetSystemMetrics(1)))

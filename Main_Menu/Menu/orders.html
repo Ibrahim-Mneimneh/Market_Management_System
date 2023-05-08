@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Market Management System (Stocks)</title>
+        <link href="orders.css" rel="stylesheet">
+        <script type="text/javascript" src="/eel.js"></script>
+
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="./grocery-store .png" alt="image">
+            <span>Market Management System</span>
+        </div>
+        <div class="options">
+            <span onclick="routing('manager.html')">Staff</span>
+            <span onclick="routing('stocks.html')">Stock</span>
+            <span style="color: #1aac83;">Orders</span>
+        </div>
+    </div>
+    <div class="navbar">
+        <div class="logo">
+            <img src="./grocery-store .png" alt="image">
+            <span>Market Management System</span>
+        </div>
+        <div class="options">
+            <span onclick="routing('manager.html')">Staff</span>
+            <span onclick="routing('stocks.html')">Stock</span>
+            <span style="color: #1aac83;">Orders</span>
+        </div>
+    </div>
+    <div class="orders-section">
+        <b id="account"></b>
+        <div class="orders" id="orders">
+
+        </div>
+    </div>
+
+    <script>
+        eel.passProps()(receivedData);
+        var orderNumbers=[];
+        var orderPrices=[];
+        var customerNames=[]
+        getResult();
+        setTimeout(()=>{
+            var orderInfo="";
+            orderNumbers.map((name,index)=>{
+                if(customerNames[index]==="Order has no customer!"){
+                    orderInfo=orderInfo+"<div class='info' id='"+index+"'><h2>Order Number: "+orderNumbers[index]+"</h2><p><strong>Order Price: "+orderPrices[index]+"$</strong></p></div>"
+                }
+                else{
+                    orderInfo=orderInfo+"<div class='info' id='"+index+"'><h2>Order Number: "+orderNumbers[index]+"</h2><p><strong>Order Price: "+orderPrices[index]+"$</strong></p><p><strong> Customer: "+customerNames[index]+" </strong></p></div>"
+                }
+            })
+            document.getElementById("orders").innerHTML=orderInfo;
+        },500);
+
+        function routing(newPage){
+            window.close();
+            eel.routing(newPage);
+        }
+        function receivedData(props){
+            props= "Welcome "+props;
+            document.getElementById("account").innerHTML=props;
+        }
+        function setOrderNumber(numbers){
+            orderNumbers=numbers;
+        }
+        function setOrderPrices(price){
+            orderPrices=price;
+        }
+        function setCustomerNames(names){
+            customerNames=names;
+        }
+        function getResult(){
+            eel.getOrderNumbers()(setOrderNumber);
+            eel.getOrderPrice()(setOrderPrices);
+            eel.getCustomerNames()(setCustomerNames);
+        }
+
+    </script>
+</body>
+</html>

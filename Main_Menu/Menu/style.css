@@ -7,7 +7,6 @@ body {
 }
 .login-section {
   display: grid;
-  padding-top: 10px;
   grid-template-columns: repeat(2, 2fr);
   height: 50vh;
   background-image: url(https://images.unsplash.com/photo-1530569673472-307dc017a82d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTV8fGJsdWUlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60);
@@ -45,9 +44,8 @@ body {
 
 .signup-section {
   display: grid;
-  padding-top: 10px;
   grid-template-columns: repeat(2, 2fr);
-  height: 47.25vh;
+  height: 50vh;
   background-color: cornflowerblue;
   background-size: cover;
   color: black;

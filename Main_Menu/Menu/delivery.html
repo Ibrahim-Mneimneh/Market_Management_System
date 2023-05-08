@@ -2,8 +2,8 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Market Management System (Home In Store Order)</title>
-        <link href="home.css" rel="stylesheet">
+    <title>Market Management System (Home Delivery)</title>
+        <link href="delivery.css" rel="stylesheet">
         <script type="text/javascript" src="/eel.js"></script>
         <script>
         eel.passProps()(receivedData);
@@ -19,9 +19,13 @@
         }
         function handleError(text){
 
-            if(text==="Order created Successfully!"){
-                document.getElementById("message"),innerHTML="";
+            if(text==="Customer's order was added Successfully!"){
+                document.getElementById("message").innerHTML="";
                 document.getElementById("items").innerHTML="";
+                document.getElementById("firstname").value="";
+                document.getElementById("lastname").value="";
+                document.getElementById("phoneNumber").value="";
+                document.getElementById("address").innerHTML="";
                 document.getElementById("barcode").value="";
                 document.getElementById("quantity").value="";
                 document.getElementById("promoCode").value="";
@@ -30,10 +34,8 @@
                 quantities=[];
                 itemName=[];
                 itemPrice=[];
-                itemCount=0;
             }
             else{
-                itemCount=0;
                 document.getElementById("message").innerHTML=text;
             }
         }
@@ -48,7 +50,6 @@
         var quantities=[];
         var itemName=[];
         var itemPrice=[];
-        var itemCount=0;
         async function getDataPrice(priceData){
             await itemPrice.push(priceData);
         }
@@ -97,6 +98,7 @@
                     }
                     else{
                         handleError("Please enter a Quantity!");
+
                     }
                 }
             }
@@ -109,6 +111,7 @@
                 itemName.shift();
                 itemPrice.shift();
             }
+
             else{
                 barcodes.splice(id,id);
                 quantities.splice(id,id);
@@ -129,13 +132,18 @@
         function submit(){
             document.getElementById("result").innerHTML="";
             document.getElementById("message").innerHTML="";
-            if(barcodes!=[]){
+            var firstname=document.getElementById("firstname").value;
+            var lastname=document.getElementById("lastname").value;
+            var phoneNumber=document.getElementById("phoneNumber").value;
+            var address=document.getElementById("address").value;
+
+            if(barcodes!=[] && firstname && lastname && phoneNumber && address){
                 var username= document.getElementById("account").innerHTML;
                 username=username.split(" ")[1];
 
-                promoCode=document.getElementById("promoCode").value;
+                promoCode=document.getElementById("promoCode").innerHTML;
 
-                eel.add_order(barcodes,quantities,username,promoCode,false)(handleError);
+                eel.add_delivery_order(barcodes,quantities,username,promoCode,firstname,lastname,phoneNumber,address)(handleError);
             }
             else{
                 document.getElementById("message").innerHTML="Please add an Item!";
@@ -150,8 +158,8 @@
             <span>Market Management System</span>
         </div>
         <div class="options">
-            <span style="color: #1aac83;">In Store Order</span>
-            <span onclick="routing('delivery.html')">Delivery</span>
+            <span onclick="routing('home.html')">In Store Order</span>
+            <span style="color: #1aac83;">Delivery</span>
         </div>
     </div>
     <div class="home">
@@ -167,11 +175,22 @@
                 <input type="number" placeholder="XXXXXXXX" id="barcode"/>
                 <label>Quantity:</label>
                 <input type="number" placeholder="0" id="quantity"/>
-                <div class="submit">
-                    <button class="add" onclick="add()">Add</button>
-                </div>
             </div>
+            <div class="submit">
+                <button class="add" onclick="add()">Add</button>
+            </div>
+            <span>Customer's Info</span>
+            <div class="form">
+                <label>Firstname:</label>
+                <input type="text" placeholder="James" id="firstname"/>
+                <label>Lastname:</label>
+                <input type="text" placeholder="Brown" id="lastname"/>
 
+                <label>Phonenumber:</label>
+                <input type="number" placeholder="03647473" id="phoneNumber"/>
+                <label>Address:</label>
+                <input type="text" placeholder="Beirut-Mazraa-Jana bldg-7th floor" id="address"/>
+            </div>
             <div class="form">
                 <label>PromoCode: (Optional)</label>
                 <input type="text" placeholder="XXXXX" id="promoCode"/>
@@ -182,9 +201,7 @@
                 <b id="result" class="result"></b>
             </div>
 
-
         </div>
     </div>
-
 </body>
 </html>

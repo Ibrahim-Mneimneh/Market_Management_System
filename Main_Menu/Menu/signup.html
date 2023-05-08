@@ -11,8 +11,8 @@
     <div class="signup">
         <span>Sign Up</span>
             <div class="name">
-                <input type="text" placeholder="Firstname" required id="firstname"/>
-                <input type="text" placeholder="Lastname" required id="lastname"/>
+                <input type="text" placeholder="First name" required id="firstname"/>
+                <input type="text" placeholder="Last name" required id="lastname"/>
             </div>
             <input type="text" placeholder="Username" required id="username"/>
             <input type="email" placeholder="Email" required id="email"/>
@@ -22,7 +22,8 @@
             <button onclick="submit()">Sign Up</button>
             <b id="message" style="color:red"></b>
     </div>
-    <script>var username=document.getElementById("firstname").value;
+    <script>
+        var username=document.getElementById("firstname").value;
         var lastname=document.getElementById("lastname");
         var username=document.getElementById("username");
         var email=document.getElementById("email");
@@ -30,7 +31,6 @@
         var password=document.getElementById("password").value;
         var confirmPassword=document.getElementById("confirmPassword").value;
         var error =""
-
         function routing(newPage){
         window.close()
         eel.routing(newPage)
@@ -38,6 +38,7 @@
         function handleError(text){
             document.getElementById("message").innerHTML=text;
             if(text==="Signed up Successfully"){
+            eel.getProps(username.value);
             routing("home.html");
             }
         }
